@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TUP Admission Application</title>
+
+    <link rel="stylesheet" href="../static/style.css" />
+
+    <link rel="stylesheet" href="../static/admission.css" />
+    </head>
+  <body>
+    <header id="header" class="header">
+      <img src="logo tup .svg" alt="Logo" class="logo2" />
+      <nav class="nav-menu">
+        <a href="login.html" class="nav-item">Home</a>
+        <a href="admission-form.html" class="nav-item active"
+          >Admission Inquiries</a
+        >
+        <a href="#" class="nav-item">Registrar</a>
+        <a href="#" class="nav-item">Departments</a>
+        <a href="#" class="nav-item">About TUP</a>
+      </nav>
+    </header>
+
+    <div class="form-container">
+      <form action="/submit-admission" method="POST" enctype="multipart/form-data">
+        <h2>TUP Admission Application Form</h2>
+
+        <fieldset>
+          <legend>Personal Information</legend>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="first-name">First Name</label>
+              <input type="text" id="first-name" name="first_name" required />
+            </div>
+            <div class="form-group">
+              <label for="last-name">Last Name</label>
+              <input type="text" id="last-name" name="last_name" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dob">Date of Birth</label>
+              <input type="date" id="dob" name="date_of_birth" required />
+            </div>
+            <div class="form-group">
+              <label for="gender">Gender</label>
+              <select id="gender" name="gender">
+                <option value="" disabled selected>Select your gender</option>
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+                <option value="other">Other</option>
+                <option value="prefer_not_to_say">Prefer not to say</option>
+              </select>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Contact Information</legend>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email" required />
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone Number</label>
+            <input type="tel" id="phone" name="phone_number" />
+          </div>
+          <div class="form-group">
+            <label for="address">Home Address</label>
+            <textarea id="address" name="address" rows="3"></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Academic Information</legend>
+          <div class="form-group">
+            <label for="program">Select Program of Interest</label>
+            <select id="program" name="program_choice" required>
+              <option value="" disabled selected>Choose a program...</option>
+              <option value="bs-it">
+                Bachelor of Science in Information Technology
+              </option>
+              <option value="bs-cs">
+                Bachelor of Science in Computer Science
+              </option>
+              <option value="bs-ece">
+                Bachelor of Science in Electronics Engineering
+              </option>
+              <option value="bs-mech">
+                Bachelor of Science in Mechanical Engineering
+              </option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="high-school">Previous School Attended</label>
+            <input
+              type="text"
+              id="high-school"
+              name="previous_school"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <label for="transcript">Upload Transcript (PDF, JPG, PNG)</label>
+            <input
+              type="file"
+              id="transcript"
+              name="transcript_file"
+              accept=".pdf,.jpg,.jpeg,.png"
+            />
+          </div>
+        </fieldset>
+
+        <button type="submit" class="submit-btn">
+          Submit Application
+        </button>
+      </form>
+    </div>
+  </body>
+</html>
