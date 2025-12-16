@@ -209,10 +209,11 @@ function add_document_type($db) {
       </div>
       <nav class="nav-menu">
         <a href="login.php" class="nav-item">HOME</a>
-        <a href="#" class="nav-item active">ADMISSIONS</a>
-        <a href="#" class="nav-item">REQUIREMENTS</a>
-        <a href="#" class="nav-item">PROGRAMS</a>
-        <a href="#" class="nav-item">HELP</a>
+        <a href="admission.php" class="nav-item">ADMISSIONS</a>
+        <a href="registrar.php" class="nav-item active">REGISTRAR</a>
+        <a href="program.php" class="nav-item ">PROGRAMS</a>
+        <a href="#" class="nav-item">DEPARTMENTS</a>
+        <a href="#" class="nav-item">ABOUT TUP</a>
       </nav>
       
       <div class="nav-footer" onclick="toggleMenu()">

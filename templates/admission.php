@@ -6,22 +6,37 @@
     <title>TUP Admission Application</title>
 
     <link rel="stylesheet" href="../static/style.css" />
-
     <link rel="stylesheet" href="../static/admission.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     </head>
   <body>
-    <header id="header" class="header">
-      <img src="logo tup .svg" alt="Logo" class="logo2" />
+
+   <header id="header" class="header">
+      <div class="logo-container">
+          <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
+      </div>
       <nav class="nav-menu">
-        <a href="login.html" class="nav-item">Home</a>
-        <a href="admission-form.html" class="nav-item active"
-          >Admission Inquiries</a
-        >
-        <a href="#" class="nav-item">Registrar</a>
-        <a href="#" class="nav-item">Departments</a>
-        <a href="#" class="nav-item">About TUP</a>
+        <a href="login.php" class="nav-item">HOME</a>
+        <a href="admission.php" class="nav-item active">ADMISSIONS</a>
+        <a href="registrar.php" class="nav-item">REGISTRAR</a>
+        <a href="program.php" class="nav-item ">PROGRAMS</a>
+        <a href="#" class="nav-item">DEPARTMENTS</a>
+        <a href="#" class="nav-item">ABOUT TUP</a>
       </nav>
+      
+      <div class="nav-footer" onclick="toggleMenu()">
+        <i class="fa-solid fa-arrow-left"></i>
+      </div>
     </header>
+
+    <main class="main-content">
+        <button class="menu-toggle" onclick="toggleMenu()">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+        <div class="top-bar">
+            <p id="date-time">Loading...</p>
+        </div>
 
     <div class="form-container">
       <form action="/submit-admission" method="POST" enctype="multipart/form-data">
@@ -118,5 +133,7 @@
         </button>
       </form>
     </div>
+
+    <script src="../static/home.js"></script>
   </body>
 </html>
