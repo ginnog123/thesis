@@ -1,29 +1,46 @@
 <?php
 session_start();
-// Security: Only allow existing Admins to create new Admins
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
-    exit;
-}
-
 $host = "localhost"; $dbname = "tup_system"; $dbuser = "root"; $dbpass = "";
 $success = ""; $error = "";
+$is_first_run = false;
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    try {
-        $pdo = new PDO("mysql:host=$host;dbname=$dbname", $dbuser, $dbpass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+try {
+    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $dbuser, $dbpass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // 1. SMART SECURITY CHECK
+    // Count how many admins exist
+    $stmt = $pdo->query("SELECT COUNT(*) FROM users WHERE role = 'admin'");
+    $admin_count = $stmt->fetchColumn();
+
+    if ($admin_count == 0) {
+        $is_first_run = true; // Allow access without login
+    } else {
+        // If admins exist, strict security applies
+        if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+            header("Location: login.php");
+            exit;
+        }
+    }
+
+    // 2. Handle Registration
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $username = $_POST['username'];
         $full_name = $_POST['full_name'];
         $hashed_password = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
         $stmt = $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, 'admin')");
         $stmt->execute([$username, $hashed_password, $full_name]);
-        $success = "Admin account created successfully!";
-    } catch (PDOException $e) {
-        $error = "Registration failed: " . $e->getMessage();
+        
+        if ($is_first_run) {
+            $success = "System Setup Complete! <a href='login.php' style='color:#8b0000; font-weight:bold;'>Go to Login</a>";
+        } else {
+            $success = "New admin account created successfully!";
+        }
     }
+
+} catch (PDOException $e) {
+    $error = "System Error: " . $e->getMessage();
 }
 ?>
 
@@ -37,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
     <div class="admin-container">
+        <?php if (!$is_first_run): ?>
         <aside class="sidebar">
             <div class="sidebar-header">
                 <img src="logo tup .svg" alt="TUP Logo" class="admin-logo">
@@ -49,17 +67,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <a href="logout.php" class="nav-link logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
             </nav>
         </aside>
+        <?php endif; ?>
 
-        <main class="content-area">
+        <main class="content-area" style="<?= $is_first_run ? 'margin:0 auto; max-width:600px;' : '' ?>">
             <header class="top-header">
-                <h2>Administrative Management</h2>
+                <h2><?= $is_first_run ? 'System Initialization' : 'Administrative Management' ?></h2>
             </header>
 
             <section class="form-section">
                 <div class="form-card">
                     <div class="form-header">
-                        <h3>Create New Admin Account</h3>
-                        <p>Assign administrative privileges to a new user.</p>
+                        <h3><?= $is_first_run ? 'Setup First Admin' : 'Create New Admin Account' ?></h3>
+                        <p><?= $is_first_run ? 'Welcome! Please create the main administrator account to begin.' : 'Assign administrative privileges to a new user.' ?></p>
                     </div>
 
                     <?php if($success): ?>
@@ -70,6 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="alert alert-danger"><i class="fa-solid fa-circle-exclamation"></i> <?= $error ?></div>
                     <?php endif; ?>
 
+                    <?php if (!($is_first_run && $success)): ?>
                     <form method="POST" class="styled-form" id="adminForm">
                         <div class="input-group">
                             <label><i class="fa-solid fa-user-tag"></i> Username</label>
@@ -80,17 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <input type="text" name="full_name" placeholder="Enter complete name" required>
                         </div>
                         <div class="input-group">
-                            <label><i class="fa-solid fa-key"></i> Temporary Password</label>
+                            <label><i class="fa-solid fa-key"></i> Password</label>
                             <input type="password" name="password" id="passInput" placeholder="Minimum 8 characters" required>
                             <small id="passStrength"></small>
                         </div>
-                        <button type="submit" class="btn-submit">Register Administrator</button>
+                        <button type="submit" class="btn-submit"><?= $is_first_run ? 'Complete Setup' : 'Register Administrator' ?></button>
                     </form>
+                    <?php endif; ?>
                 </div>
             </section>
         </main>
     </div>
-
     <script src="../static/admin.js"></script>
 </body>
 </html>
