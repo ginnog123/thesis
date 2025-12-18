@@ -1,3 +1,10 @@
+<?php
+session_start();
+
+$is_logged_in = isset($_SESSION['user_id']); 
+$role = $_SESSION['role'] ?? 'guest';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -15,7 +22,7 @@
           <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
       <nav class="nav-menu">
-        <a href="login.php" class="nav-item">HOME</a>
+        <a href="home.php" class="nav-item">HOME</a>
         <a href="admission.php" class="nav-item">ADMISSIONS</a>
         <a href="registrar.php" class="nav-item">REGISTRAR</a>
         <a href="program.php" class="nav-item active">PROGRAMS</a>
@@ -23,9 +30,15 @@
         <a href="#" class="nav-item">ABOUT TUP</a>
       </nav>
       
-      <div class="nav-footer" onclick="toggleMenu()">
-        <i class="fa-solid fa-arrow-left"></i>
-      </div>
+      <div class="sidebar-footer">
+                <?php if(!$is_logged_in): ?>
+                    <a href="login.php" class="login-btn"><i class="fa-solid fa-user"></i> LOGIN</a>
+                <?php else: ?>
+                    <a href="logout.php" class="login-btn logout"><i class="fa-solid fa-sign-out"></i> LOGOUT</a>
+                <?php endif; ?>
+            </div>
+        </nav>
+        <div class="nav-footer" onclick="toggleMenu()"><i class="fa-solid fa-arrow-left"></i></div>
     </header>
 
     <main class="main-content">
@@ -68,7 +81,7 @@
 
     <div class="overlay" onclick="toggleMenu()"></div>
 
-    <script src="../static/home.js"></script> 
+    
     
     <script>
         const programs = [
@@ -159,5 +172,8 @@
         });
 
     </script>
+
+    <script src="../static/header.js"></script>
+    <script src="../static/home.js"></script> 
   </body>
 </html>

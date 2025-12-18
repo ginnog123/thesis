@@ -208,7 +208,7 @@ function add_document_type($db) {
           <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
       <nav class="nav-menu">
-        <a href="login.php" class="nav-item">HOME</a>
+        <a href="home.php" class="nav-item">HOME</a>
         <a href="admission.php" class="nav-item">ADMISSIONS</a>
         <a href="registrar.php" class="nav-item active">REGISTRAR</a>
         <a href="program.php" class="nav-item ">PROGRAMS</a>
@@ -321,6 +321,7 @@ function add_document_type($db) {
     <div class="overlay" onclick="toggleMenu()"></div>
 
     <script src="../static/home.js"></script>
+    <script src="../static/header.js"></script>
 
 </body>
 </html>

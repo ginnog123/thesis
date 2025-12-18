@@ -288,3 +288,74 @@ body {
         display: block;
     }
 }
+
+/* Sidebar Footer Container */
+.sidebar-footer {
+    width: 100%;
+    margin-top: auto; /* Pushes the footer to the very bottom of the nav-menu */
+    padding: 20px 15px;
+    border-top: 1px solid #eee; /* Subtle separation line */
+}
+
+/* Base Login Button Style */
+.login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 12px;
+    background-color: #8b0000; /* TUP Maroon */
+    color: #ffffff !important;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 6px rgba(139, 0, 0, 0.2);
+}
+
+/* Logout Specific Styling */
+.login-btn.logout {
+    background-color: #333; /* Dark gray for Logout */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Hover Effects */
+.login-btn:hover {
+    background-color: #a93226; /* Lighter red */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(139, 0, 0, 0.3);
+}
+
+.login-btn.logout:hover {
+    background-color: #000;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Navigation Footer (The Toggle Arrow) */
+.nav-footer {
+    width: 100%;
+    padding: 15px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    background-color: #f8f9fa;
+    color: #8b0000;
+    transition: background 0.3s;
+}
+
+.nav-footer:hover {
+    background-color: #eee;
+}
+
+.nav-footer i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+}
+
+/* Rotation if sidebar is collapsed */
+.header.collapsed .nav-footer i {
+    transform: rotate(180deg);
+}
