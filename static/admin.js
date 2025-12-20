@@ -51,3 +51,47 @@ document.querySelectorAll('.nav-link').forEach(link => {
         link.classList.remove('active');
     }
 });
+
+
+// --- DOCUMENT CHECKLIST MODAL LOGIC ---
+const modal = document.getElementById('checklistModal');
+const enrollBtn = document.getElementById('enrollBtn');
+const checkboxes = document.querySelectorAll('.doc-check');
+
+function openChecklist(id, name) {
+    document.getElementById('modalStudentName').innerText = name;
+    document.getElementById('modalAppId').innerText = id;
+    document.getElementById('formAppId').value = id;
+    
+    // Reset Checkboxes
+    checkboxes.forEach(cb => cb.checked = false);
+    updateModalBtn();
+    
+    modal.style.display = 'flex';
+}
+
+function closeChecklist() {
+    modal.style.display = 'none';
+}
+
+function updateModalBtn() {
+    const checkedCount = document.querySelectorAll('.doc-check:checked').length;
+    const totalCount = checkboxes.length;
+
+    if (checkedCount === totalCount) {
+        enrollBtn.innerText = "Complete Enrollment";
+        enrollBtn.style.backgroundColor = "#27ae60"; 
+        enrollBtn.classList.remove('follow-up');
+    } else {
+        enrollBtn.innerText = "Enroll (To Be Followed)";
+        enrollBtn.style.backgroundColor = "#e67e22";
+        enrollBtn.classList.add('follow-up');
+    }
+}
+
+// Close modal if clicked outside
+window.onclick = function(event) {
+    if (event.target == modal) {
+        closeChecklist();
+    }
+}

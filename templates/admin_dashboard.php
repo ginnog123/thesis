@@ -137,10 +137,15 @@ try {
                                         </form>
 
                                     <?php elseif ($app['status'] === 'Document Checking'): ?>
-                                        <form action="update_status.php" method="POST">
-                                            <input type="hidden" name="app_id" value="<?= $app['application_id'] ?>">
-                                            <button type="submit" name="action" value="enroll" class="btn-action enroll">Enroll Student</button>
-                                        </form>
+                                        <button onclick="openChecklist('<?= $app['application_id'] ?>', '<?= htmlspecialchars($app['first_name'].' '.$app['last_name']) ?>')" class="btn-action verify">
+                                            <i class="fa-solid fa-list-check"></i> Verify Documents
+                                        </button>
+
+                                    <?php elseif ($app['status'] === 'Enrolled'): ?>
+                                        <span style="color:#27ae60; font-weight:bold;"><i class="fa-solid fa-check"></i> Enrolled</span>
+                                        <?php if(!empty($app['remarks'])): ?>
+                                            <br><small style="color:#e67e22;">(Pending: <?= $app['remarks'] ?>)</small>
+                                        <?php endif; ?>
 
                                     <?php else: ?>
                                         <span style="color:#aaa;">No actions available</span>
@@ -154,9 +159,50 @@ try {
             </section>
         </main>
     </div>
+
+    <div id="checklistModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Document Verification</h3>
+                <span class="close-modal" onclick="closeChecklist()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Applicant: <strong id="modalStudentName"></strong> (<span id="modalAppId"></span>)</p>
+                <form action="update_status.php" method="POST" id="checklistForm">
+                    <input type="hidden" name="app_id" id="formAppId">
+                    <input type="hidden" name="action" value="verify_docs">
+                    <input type="hidden" name="missing_list" id="missingListInput">
+                    
+                    <div class="checklist-box">
+                        <label class="check-item">
+                            <input type="checkbox" name="docs[]" value="Form 138" class="doc-check" onchange="updateModalBtn()">
+                            <span>Form 138 (Report Card)</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" name="docs[]" value="Good Moral" class="doc-check" onchange="updateModalBtn()">
+                            <span>Certificate of Good Moral</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" name="docs[]" value="Birth Certificate" class="doc-check" onchange="updateModalBtn()">
+                            <span>PSA Birth Certificate</span>
+                        </label>
+                        <label class="check-item">
+                            <input type="checkbox" name="docs[]" value="ID Picture" class="doc-check" onchange="updateModalBtn()">
+                            <span>2x2 ID Picture</span>
+                        </label>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="submit" id="enrollBtn" class="btn-submit full-enroll">Enroll Student</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     
     <script src="../static/admin.js"></script>
     <script>
+        // Tab Filter Logic
         function filterTable(status) {
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => {
@@ -165,7 +211,6 @@ try {
                     tab.classList.add('active');
                 }
             });
-
             const rows = document.querySelectorAll('#appTableBody tr');
             rows.forEach(row => {
                 const rowStatus = row.getAttribute('data-status');
