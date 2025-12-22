@@ -1,0 +1,233 @@
+.main-content {
+    overflow-x: hidden; 
+}
+
+.top-bar {
+    margin-bottom: 15px;
+    margin-left: 0; 
+}
+
+.top-tabs {
+    display: flex;
+    gap: 10px; 
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-left: 0;
+}
+
+.tab-btn {
+    background: white;
+    border: none;
+    padding: 10px 20px; 
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 13px; 
+    cursor: pointer;
+    text-transform: uppercase;
+    color: #333;
+    box-shadow: 0 3px 5px rgba(0,0,0,0.1);
+    transition: 0.3s;
+    white-space: nowrap; 
+}
+
+.tab-btn.active {
+    background-color: #ff0000;
+    color: white;
+    box-shadow: 0 4px 10px rgba(200, 0, 0, 0.5);
+    transform: translateY(-2px); 
+}
+
+.filter-card {
+    background: white;
+    padding: 15px 20px; 
+    border-radius: 12px;
+    display: flex;
+    align-items: flex-end; 
+    gap: 15px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+    width: 100%; 
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
+.filter-group label {
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 5px;
+    color: #444;
+}
+
+.gray-input {
+    background: #f0f0f0;
+    border: 1px solid #ddd; 
+    padding: 8px 15px;
+    border-radius: 8px; 
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    height: 40px; 
+}
+
+.clear-btn {
+    background: #c0392b;
+    color: white;
+    border: none;
+    padding: 0 25px; 
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+    height: 40px; 
+    white-space: nowrap;
+    transition: 0.2s;
+}
+
+.clear-btn:hover {
+    background: #a93226;
+}
+
+.table-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.submit-btn {
+    background: #fff;
+    color: #c0392b;
+    border: #c0392b solid 2px;
+    padding: 8px 20px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 13px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    transition: 0.2s;
+}
+
+.submit-btn:hover {
+    transform: scale(1.05);
+}
+
+.custom-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 8px; 
+}
+
+.table-header-row th {
+    background-color: #a93226;
+    color: white;
+    padding: 12px 20px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.request-row {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: transform 0.1s;
+}
+
+.request-row:hover {
+    transform: scale(1.005); 
+}
+
+.request-row td {
+    padding: 15px 20px; 
+    vertical-align: middle;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 14px;
+}
+
+.request-row td:first-child {
+    border-left: 1px solid #eee;
+    border-radius: 10px 0 0 10px;
+    font-weight: 600;
+}
+
+.request-row td:last-child {
+    border-right: 1px solid #eee;
+    border-radius: 0 10px 10px 0;
+    text-align: center;
+}
+
+.blue-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 6px 15px; 
+    border-radius: 15px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 12px;
+    transition: 0.2s;
+}
+
+.blue-btn:hover {
+    background-color: #2980b9;
+}
+
+.status-tag {
+    padding: 4px 12px;
+    border-radius: 12px;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-block;
+    text-align: center;
+    min-width: 90px;
+    text-transform: uppercase;
+}
+
+.status-Pending { background-color: #f1c40f; color: black; }
+.status-Processing { background-color: #3498db; }
+.status-Ready { background-color: #2ecc71; }
+.status-Completed { background-color: #8e44ad; }
+.status-Rejected { background-color: #e74c3c; }
+
+.popup-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.popup-content {
+    background: white;
+    color: black;
+    padding: 30px;
+    border-radius: 15px;
+    width: 400px;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.close-btn {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+}
+
+.close-btn:hover {
+    color: #c0392b;
+}
