@@ -411,6 +411,7 @@ if ($is_logged_in && $role === 'student') {
             </div>
         <?php endif; ?>
     </main>
+    
 
     <script src="../static/admission.js"></script>
     <script src="../static/header.js"></script>

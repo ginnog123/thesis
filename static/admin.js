@@ -86,6 +86,7 @@ function updateModalBtn() {
         enrollBtn.innerText = "Enroll (To Be Followed)";
         enrollBtn.style.backgroundColor = "#e67e22";
         enrollBtn.classList.add('follow-up');
+        
     }
 }
 

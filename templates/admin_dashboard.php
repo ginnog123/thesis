@@ -56,6 +56,7 @@ try {
             </a>
         </nav>
     </aside>
+    
 
     <main class="content-area">
         <header class="top-header">

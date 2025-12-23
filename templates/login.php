@@ -1,6 +1,7 @@
 <?php
 session_start();
 
+
 $is_logged_in = isset($_SESSION['user_id']); 
 $role = $_SESSION['role'] ?? 'guest'; 
 $error = "";
