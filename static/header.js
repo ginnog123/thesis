@@ -2,23 +2,24 @@ document.addEventListener("DOMContentLoaded", () => {
     
     // 1. Update Date and Time
     function updateDateTime() {
-        const el = document.getElementById("date-time");
-        if (!el) return; 
-        
-        const now = new Date();
-        el.textContent = now.toLocaleDateString("en-US", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true
-        });
-    }
+    const el = document.getElementById("date-time");
+    if (!el) return;
 
-    updateDateTime();
-    setInterval(updateDateTime, 60000);
+    const now = new Date();
+    el.textContent = now.toLocaleDateString("en-US", {
+        weekday: "long",
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true
+    });
+}
+
+updateDateTime();
+setInterval(updateDateTime, 1000);
 
     // 2. Sidebar Toggle Logic
     window.toggleMenu = () => {

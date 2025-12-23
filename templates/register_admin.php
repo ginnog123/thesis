@@ -56,17 +56,25 @@ try {
     <div class="admin-container">
         <?php if (!$is_first_run): ?>
         <aside class="sidebar">
-            <div class="sidebar-header">
-                <img src="logo tup .svg" alt="TUP Logo" class="admin-logo">
-                <h3>TUP ADMIN</h3>
-            </div>
-            <nav class="sidebar-nav">
-                <a href="admin_dashboard.php" class="nav-link"><i class="fa-solid fa-gauge"></i> Dashboard</a>
-                <a href="register_admin.php" class="nav-link active"><i class="fa-solid fa-user-plus"></i> New Admin</a>
-                <div class="nav-divider"></div>
-                <a href="logout.php" class="nav-link logout"><i class="fa-solid fa-right-from-bracket"></i> Logout</a>
-            </nav>
-        </aside>
+        <div class="sidebar-header">
+            <img src="../images/logo tup .svg" alt="TUP Logo" class="admin-logo">
+            <h3>TUP ADMIN</h3>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="admin_dashboard.php" class="nav-link">
+                <i class="fa-solid fa-house"></i> Dashboard
+            </a>
+            <a href="analytics.php" class="nav-link">
+                <i class="fa-solid fa-chart-pie"></i> Analytics
+            </a>
+            <a href="register_admin.php" class="nav-link active">
+                <i class="fa-solid fa-user-shield"></i> New Admin
+            </a>
+            <a href="logout.php" class="nav-link logout">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </nav>
+    </aside>
         <?php endif; ?>
 
         <main class="content-area" style="<?= $is_first_run ? 'margin:0 auto; max-width:600px;' : '' ?>">
