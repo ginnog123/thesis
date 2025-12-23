@@ -116,13 +116,13 @@ body {
     background: rgba(255, 107, 107, 0.1);
 }
 
-/* --- MAIN CONTENT AREA --- */
 .content-area {
     margin-left: 280px;
     flex: 1;
-    padding: 30px;
+    padding: 30px 30px 30px 30px; 
     width: calc(100% - 280px);
     transition: all 0.3s ease;
+    box-sizing: border-box; 
 }
 
 .content-area.active {
