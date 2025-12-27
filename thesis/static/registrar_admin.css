@@ -1,0 +1,197 @@
+/* ===================== BASE ===================== */
+body {
+  background: linear-gradient(135deg, #f5f6fa, #eef1f7);
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  color: #333;
+}
+
+/* ===================== HEADER ===================== */
+.admin-header {
+  background: linear-gradient(135deg, #a93226, #c0392b);
+  color: white;
+  padding: 22px 35px;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.25);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ===================== CONTAINER ===================== */
+.dashboard-container {
+  padding: 35px;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* ===================== TABLE CARD ===================== */
+.custom-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 10px;
+}
+
+.table-header-row th {
+  background: #a93226;
+  color: white;
+  padding: 14px 20px;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  position: sticky;
+  top: 78px;
+  z-index: 10;
+}
+
+.table-header-row th:first-child {
+  border-radius: 14px 0 0 14px;
+}
+
+.table-header-row th:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+/* ===================== ROWS ===================== */
+.request-row {
+  background: white;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+  transition: all 0.25s ease;
+}
+
+.request-row:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.request-row td {
+  padding: 16px 20px;
+  font-size: 14px;
+  vertical-align: middle;
+}
+
+.request-row td:first-child {
+  border-radius: 14px 0 0 14px;
+  font-weight: 600;
+}
+
+.request-row td:last-child {
+  border-radius: 0 14px 14px 0;
+}
+
+/* ===================== STATUS BADGES ===================== */
+.status-tag {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  display: inline-block;
+  min-width: 95px;
+  text-align: center;
+}
+
+.status-Pending {
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: #000;
+}
+
+.status-Processing {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+}
+
+.status-Ready {
+  background: linear-gradient(135deg, #2ecc71, #27ae60);
+}
+
+.status-Rejected {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+}
+
+/* ===================== ACTION FORM ===================== */
+.action-form {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ===================== INPUTS ===================== */
+.gray-input {
+  background: #f2f3f5;
+  border: 1px solid #ddd;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  outline: none;
+  transition: 0.2s ease;
+}
+
+.gray-input:focus {
+  border-color: #c0392b;
+  background: white;
+}
+
+/* ===================== BUTTON ===================== */
+.blue-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.blue-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 15px rgba(52, 152, 219, 0.4);
+}
+
+/* ===================== EMPTY STATE ===================== */
+.custom-table td[colspan] {
+  background: white;
+  border-radius: 14px;
+  font-size: 14px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 900px) {
+  .dashboard-container {
+    padding: 20px;
+  }
+
+  .custom-table,
+  .custom-table thead,
+  .custom-table tbody,
+  .custom-table th,
+  .custom-table td,
+  .custom-table tr {
+    display: block;
+  }
+
+  .table-header-row {
+    display: none;
+  }
+
+  .request-row {
+    margin-bottom: 20px;
+    border-radius: 16px;
+  }
+
+  .request-row td {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 18px;
+  }
+
+  .request-row td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #888;
+  }
+}
