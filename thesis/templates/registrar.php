@@ -27,21 +27,22 @@ if (isset($_POST['action'])) {
 
 function load_requests($db) {
     $sql = "SELECT student_name, document, status, date_requested 
-            FROM registrar_requests";
-    
+            FROM registrar_requests
+            WHERE status != 'Completed'";
+
     $where = [];
     $params = [];
     $types = "";
 
     // DOCUMENT TAB FILTER
-    if (isset($_POST['docType']) && $_POST['docType'] !== "") {
+    if (!empty($_POST['docType'])) {
         $where[] = "document = ?";
         $params[] = $_POST['docType'];
         $types .= "s";
     }
 
     // SEARCH FILTER
-    if (isset($_POST['search']) && trim($_POST['search']) !== "") {
+    if (!empty($_POST['search'])) {
         $search = "%" . trim($_POST['search']) . "%";
         $where[] = "(student_name LIKE ? OR document LIKE ?)";
         $params[] = $search;
@@ -49,32 +50,30 @@ function load_requests($db) {
         $types .= "ss";
     }
 
-    // STATUS FILTER
-    if (isset($_POST['status']) && $_POST['status'] !== "") {
+    // STATUS FILTER (prevent Completed from being selected)
+    if (!empty($_POST['status']) && $_POST['status'] !== "Completed") {
         $where[] = "status = ?";
         $params[] = $_POST['status'];
         $types .= "s";
     }
 
     // DATE FILTER
-    if (isset($_POST['date']) && $_POST['date'] !== "") {
+    if (!empty($_POST['date'])) {
         $where[] = "DATE(date_requested) = ?";
         $params[] = $_POST['date'];
         $types .= "s";
     }
 
     if (!empty($where)) {
-        $sql .= " WHERE " . implode(" AND ", $where);
+        $sql .= " AND " . implode(" AND ", $where);
     }
 
     $sql .= " ORDER BY date_requested DESC";
 
     $stmt = $db->prepare($sql);
-
     if (!empty($params)) {
         $stmt->bind_param($types, ...$params);
     }
-
     $stmt->execute();
     $result = $stmt->get_result();
 
@@ -101,7 +100,7 @@ function load_requests($db) {
     } else {
         echo "<tr>
                 <td colspan='4' style='text-align:center; padding:20px;'>
-                    No matching requests found
+                    No active requests found
                 </td>
               </tr>";
     }
