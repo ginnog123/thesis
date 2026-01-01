@@ -375,3 +375,4 @@ function add_document_type($db) {
 
 </body>
 </html>
+

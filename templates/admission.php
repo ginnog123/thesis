@@ -476,3 +476,4 @@ if ($is_logged_in && $role === 'student') {
     <script src="../static/header.js"></script>
 </body>
 </html>
+

@@ -686,7 +686,6 @@ body {
     animation: scaleIn 0.5s ease-out;
 }
 
-
 .failed-icon {
     font-size: 80px;
     color: var(--primary-accent);

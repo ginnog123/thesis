@@ -50,7 +50,6 @@ body {
 }
 
 
-
 .sidebar.active {
     transform: translateX(-100%);
 }

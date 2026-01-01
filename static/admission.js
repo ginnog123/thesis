@@ -50,7 +50,6 @@ window.addEventListener('load', function() {
     }
 });
 
-
 // --- Tab Switching Logic ---
 function switchStep(stepNum) {
     const steps = document.querySelectorAll('.modern-tab');

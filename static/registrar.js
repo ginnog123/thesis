@@ -139,3 +139,4 @@ function showManageDocsPopup() {
 function closeManageDocsPopup() {
     $("#manageDocsPopup").fadeOut();
 }
+

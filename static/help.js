@@ -27,7 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
                       "<strong>Teacher Education (BTVTEd):</strong><br>- Electrical, Electronics, Computer Programming, Hardware Servicing" +
                       "</div>"
         },
-        
+
 
         // --- TUITION & FEES ---
         {
@@ -164,3 +164,4 @@ document.addEventListener("DOMContentLoaded", () => {
         return defaultResponse;
     }
 });
+
