@@ -17,26 +17,57 @@ $role = $_SESSION['role'] ?? 'guest';
     
    <header id="header" class="header">
       <div class="logo-container">
-          <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
+          <img src="../images/logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
+
       <nav class="nav-menu">
-        <a href="home.php" class="nav-item active">HOME</a>
-        <a href="admission.php" class="nav-item">ADMISSIONS</a>
-        <a href="registrar.php" class="nav-item">REGISTRAR</a>
-        <a href="program.php" class="nav-item ">PROGRAMS</a>
-        <a href="#" class="nav-item">DEPARTMENTS</a>
-        <a href="#" class="nav-item">ABOUT TUP</a>
+        <div class="nav-section-label">Main Menu</div>
+        
+        <a href="home.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-house"></i> <span>HOME</span>
+        </a>
+        <a href="admission.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'admission.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-graduation-cap"></i> <span>ADMISSIONS</span>
+        </a>
+        <a href="registrar.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'registrar.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-file-signature"></i> <span>REGISTRAR</span>
+        </a>
+        <a href="program.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'program.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-book-open"></i> <span>PROGRAMS</span>
+        </a>
+
+        <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
+        </a>
+        
+        <div class="nav-section-label">University</div>
+        
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span>
+        </a>
+        <a href="#" class="nav-item">
+            <i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span>
+        </a>
       </nav>
       
       <div class="sidebar-footer">
-                <?php if(!$is_logged_in): ?>
-                    <a href="login.php" class="login-btn"><i class="fa-solid fa-user"></i> LOGIN</a>
-                <?php else: ?>
-                    <a href="logout.php" class="login-btn logout"><i class="fa-solid fa-sign-out"></i> LOGOUT</a>
-                <?php endif; ?>
-            </div>
-        </nav>
-        <div class="nav-footer" onclick="toggleMenu()"><i class="fa-solid fa-arrow-left"></i></div>
+            <?php if(!$is_logged_in): ?>
+                <a href="login.php" class="login-btn">
+                    <i class="fa-solid fa-right-to-bracket"></i> LOGIN
+                </a>
+            <?php else: ?>
+                <div class="user-info" style="text-align: center; color: #dcdcdc; font-size: 12px; margin-bottom: 10px;">
+                    Logged in as: <strong style="color: white; display:block;"><?= htmlspecialchars($_SESSION['user_id']) ?></strong>
+                </div>
+                <a href="logout.php" class="login-btn logout">
+                    <i class="fa-solid fa-right-from-bracket"></i> LOGOUT
+                </a>
+            <?php endif; ?>
+      </div>
+
+      <div class="nav-footer" onclick="toggleMenu()">
+          <span>Close Menu</span>
+      </div>
     </header>
 
     <main class="main-content">

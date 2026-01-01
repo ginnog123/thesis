@@ -52,11 +52,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     <header id="header" class="header">
       <div class="logo-container">
-          <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
+          <img src="../images/logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
 
       <nav class="nav-menu">
         <div class="nav-section-label">Main Menu</div>
+        
         <a href="home.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-house"></i> <span>HOME</span>
         </a>
@@ -68,6 +69,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         </a>
         <a href="program.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'program.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-book-open"></i> <span>PROGRAMS</span>
+        </a>
+
+        <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
         <div class="nav-section-label">University</div>
         <a href="#" class="nav-item"><i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span></a>

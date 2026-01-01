@@ -1,11 +1,10 @@
-/* --- programs.css --- */
 .programs-header {
     margin-bottom: 30px;
 }
 
 .programs-header h1 {
     font-family: 'Oswald', sans-serif;
-    color: #c0392b;
+    color: var(--primary-accent);
     font-size: 32px;
     margin-bottom: 10px;
     text-transform: uppercase;
@@ -14,10 +13,8 @@
 .programs-header p {
     color: #666;
     font-size: 16px;
-    color: white;
 }
 
-/* Filter Bar */
 .program-filter-bar {
     display: flex;
     gap: 20px;
@@ -39,12 +36,11 @@
 }
 
 .search-input:focus, .filter-select:focus {
-    border-color: #c0392b;
+    border-color: var(--primary-accent);
     background-color: white;
     outline: none;
 }
 
-/* Program Grid */
 .program-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -59,7 +55,7 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    border-left: 5px solid #c0392b;
+    border-left: 5px solid var(--primary-accent);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -79,7 +75,7 @@
     font-family: 'Poppins', sans-serif;
     font-size: 18px;
     font-weight: 700;
-    color: #333;
+    color: var(--main-bg-dark);
     line-height: 1.4;
     margin-right: 10px;
 }
@@ -93,20 +89,13 @@
     flex-shrink: 0;
 }
 
-
-.college-tag.COET { background-color: #3498db; }
-.college-tag.CICT { background-color: #2ecc71; }
+.college-tag.COET { background-color: var(--btn-blue); }
+.college-tag.CICT { background-color: var(--success-green); }
 .college-tag.CIT { background-color: #f39c12; }
 .college-tag.CAS { background-color: #9b59b6; }
-
-.college-tag.COE { background-color: #c0392b; } 
-.college-tag.CIE { background-color: #f39c12; } 
-.college-tag.CLA { background-color: #2980b9; } 
-
-
-.college-tag.CICT { background-color: #2ecc71; } 
-.college-tag.CIT { background-color: #9b59b6; }
-.college-tag.CAS { background-color: #1abc9c; }
+.college-tag.COE { background-color: var(--primary-accent); }
+.college-tag.CIE { background-color: var(--warm-beige); }
+.college-tag.CLA { background-color: #2980b9; }
 
 .program-desc {
     font-size: 14px;
@@ -117,7 +106,7 @@
 
 .details-btn {
     align-self: flex-start;
-    background-color: #c0392b;
+    background-color: var(--primary-accent);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -128,9 +117,8 @@
 }
 
 .details-btn:hover {
-    background-color: #a93226;
+    background-color: var(--primary-accent-hover);
 }
-
 
 .popup-overlay {
     position: fixed;
@@ -153,7 +141,7 @@
 }
 
 .popup-content h2 {
-    color: #c0392b;
+    color: var(--primary-accent);
     margin-bottom: 15px;
     font-family: 'Oswald', sans-serif;
 }
@@ -168,14 +156,11 @@
 }
 
 .submit-btn {
-
     margin-top: 20px;
     display: block;
     width: 100%;
 }
 
-
-/* Responsiveness */
 @media (max-width: 768px) {
     .program-filter-bar {
         flex-direction: column;

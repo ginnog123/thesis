@@ -50,6 +50,7 @@ window.addEventListener('load', function() {
     }
 });
 
+// --- Tab Switching Logic ---
 function switchStep(stepNum) {
     const steps = document.querySelectorAll('.modern-tab');
     const clickedStep = steps[stepNum - 1];
@@ -61,4 +62,47 @@ function switchStep(stepNum) {
         document.querySelectorAll('.step-pane').forEach(el => el.classList.remove('active'));
         document.getElementById('step-' + stepNum).classList.add('active');
     }
+}
+
+
+function updateCourseOptions() {
+ 
+    const select1 = document.getElementById('course_1');
+    const select2 = document.getElementById('course_2');
+    const select3 = document.getElementById('course_3');
+
+   
+    if (!select1 || !select2 || !select3) return;
+
+   
+    const val1 = select1.value;
+    const val2 = select2.value;
+    const val3 = select3.value;
+
+ 
+    const disableOptions = (targetSelect, ...excludedValues) => {
+        const options = targetSelect.querySelectorAll('option');
+        options.forEach(option => {
+          
+            if (option.value === "") return;
+
+          
+            if (excludedValues.includes(option.value)) {
+                option.disabled = true;
+                option.style.color = '#ccc'; 
+            } else {
+                option.disabled = false;
+                option.style.color = '';
+            }
+        });
+    };
+
+    
+    disableOptions(select2, val1, val3);
+
+  
+    disableOptions(select3, val1, val2);
+
+    
+    disableOptions(select1, val2, val3);
 }

@@ -19,13 +19,28 @@ $role = $_SESSION['role'] ?? 'guest';
     
     <header id="header" class="header">
       <div class="logo-container">
-          <img src="logo tup .svg" alt="TUP Logo" class="logo2" />
+          <img src="../images/logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
+
       <nav class="nav-menu">
-        <a href="home.php" class="nav-item">HOME</a>
-        <a href="admission.php" class="nav-item">ADMISSIONS</a>
-        <a href="registrar.php" class="nav-item">REGISTRAR</a>
-        <a href="program.php" class="nav-item active">PROGRAMS</a>
+        <div class="nav-section-label">Main Menu</div>
+        
+        <a href="home.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-house"></i> <span>HOME</span>
+        </a>
+        <a href="admission.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'admission.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-graduation-cap"></i> <span>ADMISSIONS</span>
+        </a>
+        <a href="registrar.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'registrar.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-file-signature"></i> <span>REGISTRAR</span>
+        </a>
+        <a href="program.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'program.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-book-open"></i> <span>PROGRAMS</span>
+        </a>
+
+        <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
+        </a>
         <a href="#" class="nav-item">DEPARTMENTS</a>
         <a href="#" class="nav-item">ABOUT TUP</a>
       </nav>

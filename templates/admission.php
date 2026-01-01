@@ -14,6 +14,39 @@ $role = $_SESSION['role'] ?? 'guest';
 $application = null;
 $success_msg = "";
 $error_msg = "";
+// DEFINING COURSES
+$course_offerings = [
+    "College of Science" => [
+        "BAS Laboratory Technology",
+        "BS Computer Science",
+        "BS Environmental Science",
+        "BS Information System",
+        "BS Information Technology"
+    ],
+    "College of Engineering" => [
+        "BS Civil Engineering",
+        "BS Electrical Engineering",
+        "BS Electronics Engineering",
+        "BS Mechanical Engineering"
+    ],
+    "Engineering Technology (BET)" => [
+        "BET Chemical Technology",
+        "BET Electrical Technology",
+        "BET Electronics Technology",
+        "BET Automotive Technology",
+        "BET Electromechanical Technology",
+        "BET Civil Technology",
+        "BET Instrumentation & Control Technology",
+        "BET Mechatronics Technology",
+        "BET Non-Destructive Testing Technology"
+    ],
+    "Teacher Education (BTVTEd)" => [
+        "BTVTEd Electrical Technology",
+        "BTVTEd Electronics Technology",
+        "BTVTEd ICT – Computer Programming",
+        "BTVTEd ICT – Computer Hardware Servicing"
+    ]
+];
 
 // --- HANDLE PHOTO UPLOAD ---
 if ($is_logged_in && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_photo'])) {
@@ -101,6 +134,7 @@ if ($is_logged_in && $role === 'student') {
 
       <nav class="nav-menu">
         <div class="nav-section-label">Main Menu</div>
+        
         <a href="home.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'home.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-house"></i> <span>HOME</span>
         </a>
@@ -112,6 +146,10 @@ if ($is_logged_in && $role === 'student') {
         </a>
         <a href="program.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'program.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-book-open"></i> <span>PROGRAMS</span>
+        </a>
+
+        <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
         <div class="nav-section-label">University</div>
         <a href="#" class="nav-item"><i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span></a>
@@ -379,29 +417,50 @@ if ($is_logged_in && $role === 'student') {
 
                     <fieldset>
                         <legend>Academic Preferences</legend>
-                        <div class="form-group"><label>Previous School</label><input type="text" name="previous_school" required></div>
                         <div class="form-group">
-                            <label>1st Choice</label>
-                            <select name="course_1" required>
-                                <option>BS Civil Engineering</option>
-                                <option>BS Electrical Engineering</option>
-                                <option>BS Mechanical Engineering</option>
-                                <option>BS Info Tech</option>
+                            <label>Previous School</label>
+                            <input type="text" name="previous_school" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>1st Choice (Priority)</label>
+                            <select name="course_1" id="course_1" required onchange="updateCourseOptions()">
+                                <option value="" selected disabled>-- Select Priority Course --</option>
+                                <?php foreach ($course_offerings as $college => $programs): ?>
+                                    <optgroup label="<?= $college ?>">
+                                        <?php foreach ($programs as $program): ?>
+                                            <option value="<?= $program ?>"><?= $program ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label>2nd Choice</label>
-                            <select name="course_2">
-                                <option>BS Civil Engineering</option>
-                                <option>BS Electrical Engineering</option>
-                                <option>BS Info Tech</option>
+                            <select name="course_2" id="course_2" required onchange="updateCourseOptions()">
+                                <option value="" selected disabled>-- Select 2nd Option --</option>
+                                <?php foreach ($course_offerings as $college => $programs): ?>
+                                    <optgroup label="<?= $college ?>">
+                                        <?php foreach ($programs as $program): ?>
+                                            <option value="<?= $program ?>"><?= $program ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                <?php endforeach; ?>
                             </select>
                         </div>
+
                         <div class="form-group">
                             <label>3rd Choice</label>
-                            <select name="course_3">
-                                <option>BTVTEd</option>
-                                <option>BS Industrial Tech</option>
+                            <select name="course_3" id="course_3" required onchange="updateCourseOptions()">
+                                <option value="" selected disabled>-- Select 3rd Option --</option>
+                                <?php foreach ($course_offerings as $college => $programs): ?>
+                                    <optgroup label="<?= $college ?>">
+                                        <?php foreach ($programs as $program): ?>
+                                            <option value="<?= $program ?>"><?= $program ?></option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                     </fieldset>
