@@ -60,7 +60,11 @@ const checkboxes = document.querySelectorAll('.doc-check');
 
 function openChecklist(id, name) {
     document.getElementById('modalStudentName').innerText = name;
-    document.getElementById('modalAppId').innerText = id;
+    
+    // This line caused the error before because the element didn't exist in PHP
+    const appIdElem = document.getElementById('modalAppId');
+    if(appIdElem) appIdElem.innerText = id;
+
     document.getElementById('formAppId').value = id;
     
     // Reset Checkboxes

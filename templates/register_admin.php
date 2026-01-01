@@ -23,6 +23,7 @@ try {
         }
     }
     
+    
 
     // 2. Handle Registration
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {

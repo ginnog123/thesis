@@ -157,7 +157,7 @@ try {
                                     </button>
 
                                 <?php elseif ($app['status'] === 'Enrolled'): ?>
-                                    <span style="color:var(--success); font-size:12px; font-weight:bold;">Completed</span>
+                                    <span style="color:var(--success-green); font-size:12px; font-weight:bold;">Completed</span>
                                 <?php else: ?>
                                     <span style="color:#aaa;">--</span>
                                 <?php endif; ?>
@@ -177,7 +177,11 @@ try {
                 <span class="close-modal" onclick="closeChecklist()" style="color:white;">&times;</span>
             </div>
             <div class="modal-body">
-                <p style="margin-bottom:15px; color:var(--text-secondary);">Applicant: <strong id="modalStudentName" style="color:var(--text-main);"></strong></p>
+                <p style="margin-bottom:15px; color:var(--text-muted);">
+                    Applicant: <strong id="modalStudentName" style="color:var(--text-main);"></strong><br>
+                    <small>ID: <span id="modalAppId" style="color:var(--primary-accent);"></span></small>
+                </p>
+
                 <form action="update_status.php" method="POST" id="checklistForm">
                     <input type="hidden" name="app_id" id="formAppId">
                     <input type="hidden" name="action" value="verify_docs">
@@ -210,7 +214,6 @@ try {
     
     <script src="../static/admin.js"></script>
     <script>
-        // Keep your existing tab filter logic
         function filterTable(status) {
             const tabs = document.querySelectorAll('.tab-btn');
             tabs.forEach(tab => {

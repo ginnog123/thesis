@@ -117,3 +117,4 @@ $role = $_SESSION['role'] ?? 'guest';
     <script src="../static/help.js"></script>
   </body>
 </html>
+
