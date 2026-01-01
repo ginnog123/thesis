@@ -1,0 +1,75 @@
+/* Center content in the remaining space next to sidebar */
+.login-page .main-content {
+    margin-left: 260px; /* Sidebar width */
+    width: calc(100% - 260px);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(rgba(139, 0, 0, 0.8), rgba(139, 0, 0, 0.8)), url('../static/campus.jpg');
+    background-size: cover;
+}
+
+.login-box {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-box h2 {
+    color: #8b0000;
+    margin-bottom: 30px;
+    font-family: 'Oswald', sans-serif;
+    text-transform: uppercase;
+}
+
+.input-group {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+.input-group i {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.submit-login {
+    width: 100%;
+    padding: 14px;
+    background: #8b0000;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.submit-login:hover {
+    background: #a93226;
+    transform: translateY(-2px);
+}
+
+.error-msg {
+    color: #721c24;
+    background: #f8d7da;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
