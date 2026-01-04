@@ -10,14 +10,14 @@ $role = $_SESSION['role'] ?? 'guest';
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TUP KIOSK HOME</title>
-    <link rel="stylesheet" href="../static/style.css" />
+    <link rel="stylesheet" href="/thesis/static/style.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   </head>
   <body>
     
    <header id="header" class="header">
       <div class="logo-container">
-          <img src="../logo tup .svg" alt="TUP Logo" class="logo2" />
+          <img src="/thesis/logo tup .svg" alt="TUP Logo" class="logo2" />
       </div>
       <nav class="nav-menu">
         <a href="home.php" class="nav-item active">HOME</a>
@@ -50,9 +50,9 @@ $role = $_SESSION['role'] ?? 'guest';
             <h1>WELCOME TO TUP KIOSK!</h1>
             <div class="slider-container">
                 <div class="slider-wrapper">
-                    <img src="../images/slide1.png" class="slide active" alt="Event 1">
-                    <img src="../images/image.png" class="slide" alt="Event 2">
-                    <img src="../images/tup.jpg" class="slide" alt="Event 3">
+                    <img src="/thesis/images/slide1.png" class="slide active" alt="Event 1">
+                    <img src="/thesis/images/image.png" class="slide" alt="Event 2">
+                    <img src="/thesis/images/tup.jpg" class="slide" alt="Event 3">
                 </div>
                 <button class="prev-btn" onclick="changeSlide(-1)">&#10094;</button>
                 <button class="next-btn" onclick="changeSlide(1)">&#10095;</button>
@@ -69,21 +69,22 @@ $role = $_SESSION['role'] ?? 'guest';
     <h2>CAMPUSES</h2>
     <div class="grid-box-container">
 
-        <div class="campus-box" style="--bg:url('../images/manila.jpeg')">
+        <div class="campus-box" style="--bg:url('/thesis/images/manila.jpeg')">
             <span>TUP MANILA</span>
         </div>
 
-        <div class="campus-box" style="--bg:url('../images/taguig.png')">
+        <div class="campus-box" style="--bg:url('/thesis/images/taguig.png')">
             <span>TUP TAGUIG</span>
         </div>
 
-        <div class="campus-box" style="--bg:url('../images/cavite.jpg')">
+        <div class="campus-box" style="--bg:url('/thesis/images/cavite.jpg')">
             <span>TUP CAVITE</span>
         </div>
 
-        <div class="campus-box" style="--bg:url('../images/visayas.jpg')">
+        <div class="campus-box" style="--bg:url('/thesis/images/visayas.jpg')">
             <span>TUP VISAYAS</span>
         </div>
+
 
     </div>
 </section>
@@ -123,7 +124,7 @@ $role = $_SESSION['role'] ?? 'guest';
 
     <div class="overlay" onclick="toggleMenu()"></div>
 
-    <script src="../static/home.js"></script>
-    <script src="../static/header.js"></script>
+    <script src="/thesis/static/home.js"></script>
+    <script src="/thesis/static/header.js"></script>
   </body>
 </html>

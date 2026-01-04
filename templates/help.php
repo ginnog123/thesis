@@ -104,7 +104,9 @@ $role = $_SESSION['role'] ?? 'guest';
 
                 <div class="chat-input-area">
                     <input type="text" id="userInput" placeholder="Type your question here..." onkeypress="handleEnter(event)">
-                    <button class="send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                   <button class="send-btn" onclick="sendMessage()">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
                 </div>
             </div>
         </section>

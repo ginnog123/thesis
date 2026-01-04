@@ -79,13 +79,13 @@ $role = $_SESSION['role'] ?? 'guest';
             <p id="date-time">Loading...</p>
         </div>
 
-        <section class="welcome-section">
+       <section class="welcome-section">
             <h1>WELCOME TO TUP KIOSK!</h1>
             <div class="slider-container">
                 <div class="slider-wrapper">
                     <img src="../images/slide1.png" class="slide active" alt="Event 1">
-                    <img src="slide2.jpg" class="slide" alt="Event 2">
-                    <img src="slide3.jpg" class="slide" alt="Event 3">
+                    <img src="../images/image.png" class="slide" alt="Event 2">
+                    <img src="../images/tup.jpg" class="slide" alt="Event 3">
                 </div>
                 <button class="prev-btn" onclick="changeSlide(-1)">&#10094;</button>
                 <button class="next-btn" onclick="changeSlide(1)">&#10095;</button>
@@ -98,16 +98,29 @@ $role = $_SESSION['role'] ?? 'guest';
             </div>
         </section>
 
-        <section class="campuses-section">
-            <h2>CAMPUSES</h2>
-            <div class="grid-box-container">
-                <div class="white-box campus-box"></div>
-                <div class="white-box campus-box"></div>
-                <div class="white-box campus-box"></div>
-                <div class="white-box campus-box"></div>
-            </div>
-        </section>
+     <section class="campuses-section">
+    <h2>CAMPUSES</h2>
+    <div class="grid-box-container">
 
+        <div class="campus-box" style="--bg:url('../images/manila.jpeg')">
+            <span>TUP MANILA</span>
+        </div>
+
+        <div class="campus-box" style="--bg:url('../images/taguig.png')">
+            <span>TUP TAGUIG</span>
+        </div>
+
+        <div class="campus-box" style="--bg:url('../images/cavite.jpg')">
+            <span>TUP CAVITE</span>
+        </div>
+
+        <div class="campus-box" style="--bg:url('../images/visayas.jpg')">
+            <span>TUP VISAYAS</span>
+        </div>
+
+
+    </div>
+</section>
         <section class="info-section">
             <div class="info-grid">
                 <div class="white-box info-box">
