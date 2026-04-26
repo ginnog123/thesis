@@ -5,6 +5,14 @@
 .top-bar {
   margin-bottom: 15px;
   margin-left: 0;
+  text-align: right;
+  font-weight: 600;
+  color: #666;
+  font-size: 14px;
+}
+
+#date-time {
+  margin: 0;
 }
 
 .top-tabs {
@@ -131,6 +139,11 @@
   font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  gap: 10px;
+}
+
+.table-header-row th:last-child {
+  text-align: right;
 }
 
 .request-row {
@@ -161,7 +174,7 @@
 .request-row td:last-child {
   border-right: 1px solid #eee;
   border-radius: 0 10px 10px 0;
-  text-align: center;
+  text-align: right;
 }
 
 .blue-btn {
@@ -245,4 +258,3 @@
 .close-btn:hover {
   color: #c0392b;
 }
-

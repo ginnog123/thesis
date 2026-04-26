@@ -30,7 +30,7 @@ if (isset($_POST['action'])) {
 }
 
 function load_requests($db) {
-    $sql = "SELECT student_name, document, status, date_requested 
+    $sql = "SELECT tup_id, student_name, document, status, date_requested 
             FROM registrar_requests
             WHERE status != 'Completed'";
 
@@ -48,10 +48,12 @@ function load_requests($db) {
     // SEARCH FILTER
     if (!empty($_POST['search'])) {
         $search = "%" . trim($_POST['search']) . "%";
-        $where[] = "(student_name LIKE ? OR document LIKE ?)";
+        // ADDED tup_id to the search query so users can search by ID number
+        $where[] = "(student_name LIKE ? OR document LIKE ? OR tup_id LIKE ?)";
         $params[] = $search;
         $params[] = $search;
-        $types .= "ss";
+        $params[] = $search; 
+        $types .= "sss";     
     }
 
     // STATUS FILTER (prevent Completed from being selected)
@@ -63,8 +65,12 @@ function load_requests($db) {
 
     // DATE FILTER
     if (!empty($_POST['date'])) {
+        // Ensure date format is YYYY-MM-DD
+        $filterDate = $_POST['date'];
+        // Convert to proper format if needed
+        $filterDate = date('Y-m-d', strtotime($filterDate));
         $where[] = "DATE(date_requested) = ?";
-        $params[] = $_POST['date'];
+        $params[] = $filterDate;
         $types .= "s";
     }
 
@@ -84,9 +90,10 @@ function load_requests($db) {
     echo '<table class="custom-table">
             <thead>
                 <tr class="table-header-row">
+                    <th>TUP ID</th>
                     <th>Student Name</th>
                     <th>Document</th>
-                    <th>Status</th>
+                    <th>Status </th>
                     <th>Date Requested</th>
                 </tr>
             </thead>
@@ -95,6 +102,7 @@ function load_requests($db) {
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             echo "<tr class='request-row'>
+                <td>{$row['tup_id']}</td>
                 <td>{$row['student_name']}</td>
                 <td>{$row['document']}</td>
                 <td><span class='status-tag status-{$row['status']}'>{$row['status']}</span></td>
@@ -103,7 +111,7 @@ function load_requests($db) {
         }
     } else {
         echo "<tr>
-                <td colspan='4' style='text-align:center; padding:20px;'>
+                <td colspan='5' style='text-align:center; padding:20px;'>
                     No active requests found
                 </td>
               </tr>";
@@ -127,22 +135,24 @@ function submit_request($db) {
     }
 
     $request_id = "TUP-" . strtoupper(uniqid());
+    $date_requested = date('Y-m-d H:i:s');
 
     $stmt = $db->prepare(
         "INSERT INTO registrar_requests 
-        (request_id, student_name, tup_id, course, email, contact, document, status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending')"
+        (request_id, student_name, tup_id, course, email, contact, document, status, date_requested)
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'Pending', ?)"
     );
 
     $stmt->bind_param(
-        "sssssss",
+        "ssssssss",
         $request_id,
         $name,
         $tup_id,
         $course,
         $email,
         $contact,
-        $document
+        $document,
+        $date_requested
     );
 
     $stmt->execute();
@@ -193,15 +203,11 @@ function load_document_types($db) {
         <a href="program.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'program.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-book-open"></i> <span>PROGRAMS</span>
         </a>
-        
-        <div class="nav-section-label">University</div>
-        
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span>
+        <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
+            <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span>
-        </a>
+        
+    
       </nav>
       
       <div class="sidebar-footer">

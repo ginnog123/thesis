@@ -40,14 +40,7 @@ $role = $_SESSION['role'] ?? 'guest';
             <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
         
-        <div class="nav-section-label">University</div>
-        
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span>
-        </a>
+
       </nav>
       
       <div class="sidebar-footer">
@@ -80,7 +73,7 @@ $role = $_SESSION['role'] ?? 'guest';
         </div>
 
        <section class="welcome-section">
-            <h1>WELCOME TO TUP KIOSK!</h1>
+            <h1>WELCOME TO TUP!</h1>
             <div class="slider-container">
                 <div class="slider-wrapper">
                     <img src="../images/slide1.png" class="slide active" alt="Event 1">

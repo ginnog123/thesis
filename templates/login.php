@@ -74,9 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
-        <div class="nav-section-label">University</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span></a>
+    
       </nav>
       
       <div class="sidebar-footer">

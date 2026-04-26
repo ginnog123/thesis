@@ -13,6 +13,15 @@ $role = $_SESSION['role'] ?? 'guest';
     <link rel="stylesheet" href="../static/style.css" />
     <link rel="stylesheet" href="../static/help.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+      /* CRITICAL FIX: This ensures the spacing and line breaks sent from Python render in the browser */
+      .message {
+          white-space: pre-wrap;
+          line-height: 1.5;
+      }
+    </style>
+    
   </head>
   <body>
     
@@ -40,16 +49,6 @@ $role = $_SESSION['role'] ?? 'guest';
             <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
         </a>
         
-        <div class="nav-section-label">University</div>
-        
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span>
-        </a>
-        <a href="#" class="nav-item">
-            <i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span>
-        </a>
-      </nav>
-      
       <div class="sidebar-footer">
             <?php if(!$is_logged_in): ?>
                 <a href="login.php" class="login-btn">
@@ -65,6 +64,7 @@ $role = $_SESSION['role'] ?? 'guest';
             <?php endif; ?>
       </div>
       <div class="nav-footer" onclick="toggleMenu()"><span>Close Menu</span></div>
+      </nav>
     </header>
 
     <main class="main-content">
@@ -90,16 +90,13 @@ $role = $_SESSION['role'] ?? 'guest';
                 </div>
 
                 <div class="suggestions">
-                    <div class="chip" onclick="sendSuggestion('Why did I fail?')">Why did I fail?</div>
                     <div class="chip" onclick="sendSuggestion('What courses are offered?')">Offered Courses</div>
                     <div class="chip" onclick="sendSuggestion('How much is the tuition?')">Tuition Fee</div>
-                    <div class="chip" onclick="sendSuggestion('What are the requirements?')">Requirements</div>
+                    <div class="chip" onclick="sendSuggestion('What are the enrollment procedures for freshmen?')">Requirements</div>
                 </div>
 
                 <div class="chat-box" id="chatBox">
-                    <div class="message bot-message">
-                        Hello! I am the TUP Admissions Bot. I can answer questions about the admission process, courses, and requirements. How can I help you today?
-                    </div>
+                    <div class="message bot-message">Hello! I am the TUP Admissions Bot. I can answer questions about the admission process, courses, and requirements. How can I help you today?</div>
                 </div>
 
                 <div class="chat-input-area">
@@ -119,5 +116,3 @@ $role = $_SESSION['role'] ?? 'guest';
     <script src="../static/help.js"></script>
   </body>
 </html>
-
-

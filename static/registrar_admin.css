@@ -171,22 +171,26 @@ tr:hover td {
 }
 
 /* --- BUTTONS --- */
-.btn-action {
-  padding: 8px 12px;
+.btn-action.save {
+  background: var(--btn-blue);
+  padding: 8px 14px;
   border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  color: #e74c3c;
   font-size: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: 0.2s ease;
 }
 
-.btn-action.accept {
-  background: var(--success-green);
-}
-.btn-action.reject {
-  background: #e74c3c;
+.btn-action.save i {
+  font-size: 13px;
 }
 
+.btn-action.save:hover {
+  background: #3e5f8f;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(74, 111, 165, 0.4);
+}
 /* --- RESPONSIVE --- */
 @media (max-width: 992px) {
   .sidebar {

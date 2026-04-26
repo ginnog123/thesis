@@ -128,11 +128,25 @@ try {
                             </td>
                             <td>
                                 <?php if ($app['status'] === 'Pending'): ?>
-                                    <form action="update_status.php" method="POST" style="display:flex; gap:5px;">
-                                        <input type="hidden" name="app_id" value="<?= $app['application_id'] ?>">
-                                        <button type="submit" name="action" value="accept_student" class="btn-action accept" title="Accept"><i class="fa-solid fa-check"></i></button>
-                                        <button type="submit" name="action" value="reject" class="btn-action reject" title="Reject"><i class="fa-solid fa-xmark"></i></button>
-                                    </form>
+                                    <button type="button" class="btn-action view" title="View info" onclick="openPendingInfo(this)"
+                                        data-app-id="<?= htmlspecialchars($app['application_id'] ?: '-') ?>"
+                                        data-first-name="<?= htmlspecialchars($app['first_name'] ?: '-') ?>"
+                                        data-last-name="<?= htmlspecialchars($app['last_name'] ?: '-') ?>"
+                                        data-date-of-birth="<?= htmlspecialchars($app['date_of_birth'] ?: '-') ?>"
+                                        data-gender="<?= htmlspecialchars($app['gender'] ?: '-') ?>"
+                                        data-gwa="<?= htmlspecialchars($app['final_gwa'] ?: '-') ?>"
+                                        data-strand="<?= htmlspecialchars($app['strand'] ?: '-') ?>"
+                                        data-email="<?= htmlspecialchars($app['email'] ?: '-') ?>"
+                                        data-phone-number="<?= htmlspecialchars($app['phone_number'] ?: '-') ?>"
+                                        data-address="<?= htmlspecialchars($app['address'] ?: '-') ?>"
+                                        data-course1="<?= htmlspecialchars($app['course_1'] ?: '-') ?>"
+                                        data-course2="<?= htmlspecialchars($app['course_2'] ?: '-') ?>"
+                                        data-course3="<?= htmlspecialchars($app['course_3'] ?: '-') ?>"
+                                        data-previous-school="<?= htmlspecialchars($app['previous_school'] ?: '-') ?>"
+                                        data-status="<?= htmlspecialchars($app['status'] ?: '-') ?>"
+                                        data-applied-at="<?= htmlspecialchars($app['applied_at'] ?: '-') ?>">
+                                        <i class="fa-solid fa-eye"></i> View Info
+                                    </button>
 
                                 <?php elseif ($app['status'] === 'Exam Status'): ?>
                                     <form action="update_status.php" method="POST" class="exam-form" style="display:flex; gap:5px; align-items:center;">
@@ -211,7 +225,46 @@ try {
             </div>
         </div>
     </div>
-    
+
+    <div id="pendingInfoModal" class="modal-overlay" style="display:none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 style="margin:0; color:white;">Applicant Info</h3>
+                <span class="close-modal" onclick="closePendingInfo()" style="color:white;">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom:12px; color:var(--text-muted);">
+                    Applicant: <strong id="infoStudentName" style="color:var(--text-main);"></strong><br>
+                    ID: <span id="infoAppId" style="color:var(--primary-accent);"></span><br>
+                    Status: <span id="infoStatus"></span>
+                </p>
+
+                <div class="info-grid">
+                    <div><strong>First Name:</strong> <span id="infoFirstName"></span></div>
+                    <div><strong>Last Name:</strong> <span id="infoLastName"></span></div>
+                    <div><strong>Date of Birth:</strong> <span id="infoDateOfBirth"></span></div>
+                    <div><strong>Gender:</strong> <span id="infoGender"></span></div>
+                    <div><strong>GWA:</strong> <span id="infoGwa"></span></div>
+                    <div><strong>Strand:</strong> <span id="infoStrand"></span></div>
+                    <div><strong>Course 1:</strong> <span id="infoCourse1"></span></div>
+                    <div><strong>Course 2:</strong> <span id="infoCourse2"></span></div>
+                    <div><strong>Course 3:</strong> <span id="infoCourse3"></span></div>
+                    <div><strong>Email:</strong> <span id="infoEmail"></span></div>
+                    <div><strong>Phone:</strong> <span id="infoPhoneNumber"></span></div>
+                    <div><strong>Address:</strong> <span id="infoAddress"></span></div>
+                    <div><strong>Previous School:</strong> <span id="infoPreviousSchool"></span></div>
+                    <div><strong>Applied At:</strong> <span id="infoAppliedAt"></span></div>
+                </div>
+
+                <form action="update_status.php" method="POST" id="pendingActionForm">
+                    <input type="hidden" name="app_id" id="pendingModalAppId">
+                    <button type="submit" name="action" value="accept_student" class="btn-action accept">Accept</button>
+                    <button type="submit" name="action" value="reject" class="btn-action reject">Reject</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="../static/admin.js"></script>
     <script>
         function filterTable(status) {
@@ -231,6 +284,35 @@ try {
                     row.style.display = 'none';
                 }
             });
+        }
+
+        function openPendingInfo(button) {
+            const modal = document.getElementById('pendingInfoModal');
+            const data = button.dataset;
+            document.getElementById('infoStudentName').innerText = data.firstName + ' ' + data.lastName;
+            document.getElementById('infoAppId').innerText = data.appId;
+            document.getElementById('infoStatus').innerText = data.status;
+            document.getElementById('infoFirstName').innerText = data.firstName;
+            document.getElementById('infoLastName').innerText = data.lastName;
+            document.getElementById('infoDateOfBirth').innerText = data.dateOfBirth;
+            document.getElementById('infoGender').innerText = data.gender;
+            document.getElementById('infoGwa').innerText = data.gwa;
+            document.getElementById('infoStrand').innerText = data.strand;
+            document.getElementById('infoCourse1').innerText = data.course1;
+            document.getElementById('infoCourse2').innerText = data.course2;
+            document.getElementById('infoCourse3').innerText = data.course3;
+            console.log('infoCourse1 innerText:', document.getElementById('infoCourse1').innerText);
+            document.getElementById('infoEmail').innerText = data.email;
+            document.getElementById('infoPhoneNumber').innerText = data.phoneNumber;
+            document.getElementById('infoAddress').innerText = data.address;
+            document.getElementById('infoPreviousSchool').innerText = data.previousSchool;
+            document.getElementById('infoAppliedAt').innerText = data.appliedAt;
+            document.getElementById('pendingModalAppId').value = data.appId;
+            modal.style.display = 'flex';
+        }
+
+        function closePendingInfo() {
+            document.getElementById('pendingInfoModal').style.display = 'none';
         }
     </script>
 </body>

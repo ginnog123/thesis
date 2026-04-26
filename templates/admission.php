@@ -29,6 +29,27 @@ $course_offerings = [
         "BS Electronics Engineering",
         "BS Mechanical Engineering"
     ],
+    "College of Architecture and Fine Arts" => [
+        "Bachelor of Science in Architecture",
+        "Bachelor of Fine Arts",
+        "Bachelor in Graphics Technology - Architecture Technology",
+        "Bachelor in Graphics Technology - Industrial Design",
+        "Bachelor in Graphics Technology - Mechanical Drafting Technology"
+    ],
+    "College of Industrial Education" => [
+        "BTLEd major in Information and Communication Technology",
+        "BTLEd major in Home Economics",
+        "BTLEd major in Industrial Arts",
+        "BTVTEd major in Animation",
+        "BTVTEd major in Beauty Care and Wellness",
+        "BTVTEd major in Computer Programming",
+        "BTVTEd major in Electrical",
+        "BTVTEd major in Electronics",
+        "BTVTEd major in Food Service Management",
+        "BTVTEd major in Fashion and Garment",
+        "BTVTEd major in Heat Ventilation & Air Conditioning",
+        "Bachelor of Technical Teacher Education"
+    ],
     "Engineering Technology (BET)" => [
         "BET Chemical Technology",
         "BET Electrical Technology",
@@ -82,11 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])
         $stmtUser->execute([$app_id, $hashed_password, $full_name]);
 
         $sql = "INSERT INTO admission_applications 
-                (application_id, user_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, course_1, course_2, course_3, previous_school, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
+                (application_id, user_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, course_1, course_2, course_3, previous_school, strand, final_gwa, status) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
         
         $stmtApp = $pdo->prepare($sql);
-        $stmtApp->execute([$app_id, $app_id, $first_name, $last_name, $_POST['date_of_birth'], $_POST['gender'], $_POST['email'], $_POST['phone_number'], $_POST['address'], $_POST['course_1'], $_POST['course_2'], $_POST['course_3'], $_POST['previous_school']]);
+        $stmtApp->execute([$app_id, $app_id, $first_name, $last_name, $_POST['date_of_birth'], $_POST['gender'], $_POST['email'], $_POST['phone_number'], $_POST['address'], $_POST['course_1'], $_POST['course_2'], $_POST['course_3'], $_POST['previous_school'], $_POST['strand'], $_POST['final_gwa']]);
 
         $pdo->commit();
         $success_msg = "Application Successful! Your Applicant ID is <strong>$app_id</strong>. Please <a href='login.php'>Login here</a>.";
@@ -150,10 +171,7 @@ if ($is_logged_in && $role === 'student') {
 
         <a href="help.php" class="nav-item <?= basename($_SERVER['PHP_SELF']) == 'help.php' ? 'active' : '' ?>">
             <i class="fa-solid fa-headset"></i> <span>HELP / CHAT</span>
-        </a>
-        <div class="nav-section-label">University</div>
-        <a href="#" class="nav-item"><i class="fa-solid fa-building-columns"></i> <span>DEPARTMENTS</span></a>
-        <a href="#" class="nav-item"><i class="fa-solid fa-circle-info"></i> <span>ABOUT TUP</span></a>
+
       </nav>
       
       <div class="sidebar-footer">
@@ -225,7 +243,10 @@ if ($is_logged_in && $role === 'student') {
                                     <div class="info-group"><label>Phone</label><p><?= htmlspecialchars($application['phone_number']) ?></p></div>
                                     <div class="info-group"><label>Birth Date</label><p><?= htmlspecialchars($application['date_of_birth']) ?></p></div>
                                     <div class="info-group"><label>Gender</label><p><?= ucfirst($application['gender']) ?></p></div>
+                                    <div class="info-group"><label>SHS Strand</label><p><?= htmlspecialchars($application['strand'] ?? 'N/A') ?></p></div>
+                                    <div class="info-group"><label>Final GWA</label><p><?= htmlspecialchars($application['final_gwa'] ?? 'N/A') ?></p></div>
                                     <div class="info-group full-width"><label>Address</label><p><?= htmlspecialchars($application['address']) ?></p></div>
+                                    <div class="info-group full-width"><label>Previous School</label><p><?= htmlspecialchars($application['previous_school']) ?></p></div>
                                     <div class="info-group full-width highlight-bg"><label>Priority Program</label><p><strong><?= htmlspecialchars($application['course_1']) ?></strong></p></div>
                                 </div>
                             </div>
@@ -387,8 +408,32 @@ if ($is_logged_in && $role === 'student') {
 
                     <fieldset>
                         <legend>Account Security</legend>
-                        <div class="form-group"><label>Create Password</label><input type="password" name="password" required></div>
+                        <div class="form-group">
+                            <label>Create Password</label>
+                            <div style="position: relative;">
+                                <input type="password" name="password" id="password-input" required>
+                                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c94c4c;">
+                                    <i class="fa-solid fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
                     </fieldset>
+
+                    <script>
+                        function togglePasswordVisibility() {
+                            const input = document.getElementById('password-input');
+                            const button = document.querySelector('.toggle-password i');
+                            if (input.type === 'password') {
+                                input.type = 'text';
+                                button.classList.remove('fa-eye');
+                                button.classList.add('fa-eye-slash');
+                            } else {
+                                input.type = 'password';
+                                button.classList.remove('fa-eye-slash');
+                                button.classList.add('fa-eye');
+                            }
+                        }
+                    </script>
 
                     <fieldset>
                         <legend>Personal Information</legend>
@@ -420,6 +465,22 @@ if ($is_logged_in && $role === 'student') {
                         <div class="form-group">
                             <label>Previous School</label>
                             <input type="text" name="previous_school" required>
+                        </div>
+                        <div class="form-group">
+                            <label>SHS Strand</label>
+                            <select name="strand" required>
+                                <option value="" selected disabled>-- Select SHS Strand --</option>
+                                <option value="STEM">STEM (Science, Technology, Engineering, Mathematics)</option>
+                                <option value="ABM">ABM (Accountancy, Business, Management)</option>
+                                <option value="HUMSS">HUMSS (Humanities and Social Sciences)</option>
+                                <option value="ICT">ICT (Information and Communications Technology)</option>
+                                <option value="GAS">GAS (General Academic Strand)</option>
+                                <option value="Other">Other/Not from SHS</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Final GWA (General Weighted Average)</label>
+                            <input type="number" name="final_gwa" step="0.01" min="0" max="100" placeholder="e.g., 85.50" required>
                         </div>
                         
                         <div class="form-group">

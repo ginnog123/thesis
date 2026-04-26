@@ -1,9 +1,7 @@
 let currentTabDoc = '';
 
 function openSubmitPopup() {
-  console.log('openSubmitPopup called');
   const popup = document.getElementById('submitPopup');
-  console.log('submitPopup element:', popup);
   if (popup) {
     popup.style.display = 'flex';
   }
@@ -21,8 +19,11 @@ $(document).ready(function () {
     console.error('jQuery not loaded');
     return;
   }
+
+  // Load the initial table
   loadRequests();
-  loadDocumentTypes();
+
+  // WARNING: loadDocumentTypes() was removed here because it was undefined and crashing the script!
 
   // LIVE SEARCH (instant)
   $('#searchInput').on('keyup', function () {
@@ -51,13 +52,16 @@ function filterByTab(docName, btn) {
 
 // AJAX CALL
 function loadRequests() {
+  // Safe extraction of the search value
+  let searchValue = $('#searchInput').val() || '';
+
   $.ajax({
     url: 'registrar.php',
     type: 'POST',
     data: {
       action: 'load_requests',
       docType: currentTabDoc,
-      search: $('#searchInput').val().trim(),
+      search: searchValue.trim(),
       status: $('#statusInput').val(),
       date: $('#dateInput').val(),
     },
@@ -80,54 +84,8 @@ function clearFilters() {
 
   loadRequests();
 }
+
 // ================= REQUEST SUBMISSION =================
-
-function submitRequest() {
-  let student_name = $('#studentName').val().trim();
-  let document_name = $('#documentName').val();
-
-  if (!student_name || !document_name) {
-    alert('Please fill out all fields.');
-    return;
-  }
-
-  $.post(
-    'registrar.php',
-    {
-      action: 'submit_request',
-      student_name: student_name,
-      document: document_name,
-    },
-    function (response) {
-      alert(response);
-      if (response.toLowerCase().includes('success')) {
-        closeRequestPopup();
-        $('#studentName').val('');
-        loadRequests();
-      }
-    }
-  );
-}
-
-function showRequestPopup() {
-  if ($('#documentName option').length <= 1) {
-    alert('Please add document types first.');
-    return;
-  }
-  $('#addRequestPopup').fadeIn();
-}
-
-function closeRequestPopup() {
-  $('#addRequestPopup').fadeOut();
-}
-
-function toggleCertInput() {
-  if ($('#reqDocument').val() === 'Certification') {
-    $('#certType').show().attr('required', true);
-  } else {
-    $('#certType').hide().val('').removeAttr('required');
-  }
-}
 
 function submitRegistrarRequest() {
   let documentType = $('#reqDocument').val();
@@ -154,6 +112,14 @@ function submitRegistrarRequest() {
         closeSubmitPopup();
         loadRequests();
       }
-    }
+    },
   );
+}
+
+function toggleCertInput() {
+  if ($('#reqDocument').val() === 'Certification') {
+    $('#certType').show().attr('required', true);
+  } else {
+    $('#certType').hide().val('').removeAttr('required');
+  }
 }
