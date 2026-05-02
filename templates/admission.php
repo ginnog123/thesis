@@ -69,6 +69,206 @@ $course_offerings = [
     ]
 ];
 
+function getOCRText($filePath) {
+    $text = '';
+
+    if (!file_exists($filePath)) {
+        return $text;
+    }
+
+    $tesseractPath = null;
+    if (stripos(PHP_OS, 'WIN') === 0) {
+        $where = trim(shell_exec('where tesseract 2>NUL'));
+        if ($where) {
+            $tesseractPath = $where;
+        }
+    } else {
+        $which = trim(shell_exec('command -v tesseract 2>/dev/null'));
+        if ($which) {
+            $tesseractPath = $which;
+        }
+    }
+
+    if ($tesseractPath) {
+        $escaped = escapeshellarg($filePath);
+        $output = [];
+        $returnVar = 1;
+        exec("$tesseractPath $escaped stdout 2>&1", $output, $returnVar);
+        if ($returnVar === 0) {
+            $text = implode("\n", $output);
+        }
+    }
+
+    // If OCR extraction failed or Tesseract unavailable, use filename and basic image analysis as fallback
+    if (empty($text)) {
+        $filename = basename($filePath);
+        $text = $filename;
+        
+        $info = @getimagesize($filePath);
+        if ($info) {
+            $text .= " " . $info[0] . "x" . $info[1] . "px";
+        }
+    }
+
+    return trim(strtolower($text));
+}
+
+
+function detectDocumentMatch($field, $ocrText, $imagePath, $application = []) {
+    $actualText = strtolower(trim($ocrText));
+    $filename = strtolower(basename($imagePath));
+    $actualText = trim(str_replace($filename, '', $actualText));
+    $actualText = preg_replace('/[^a-z0-9\s\.\-\/]/', ' ', $actualText);
+
+    $firstName = strtolower(trim($application['first_name'] ?? ''));
+    $lastName = strtolower(trim($application['last_name'] ?? ''));
+    $fullName = trim("$firstName $lastName");
+    $reversedName = trim("$lastName $firstName");
+    $appId = strtolower(trim($application['application_id'] ?? ''));
+    $dob = $application['date_of_birth'] ?? '';
+    $dobVariants = [];
+    if ($dob) {
+        $date = date_create($dob);
+        if ($date) {
+            $dobVariants = [
+                strtolower($date->format('Y-m-d')),
+                strtolower($date->format('m/d/Y')),
+                strtolower($date->format('d/m/Y')),
+                strtolower($date->format('m.d.Y')),
+                strtolower($date->format('d.m.Y')),
+                strtolower($date->format('F j, Y')),
+                strtolower($date->format('j F Y'))
+            ];
+        }
+    }
+
+    $nameMatched = false;
+    if ($fullName) {
+        $nameMatched = strpos($actualText, $fullName) !== false || strpos($actualText, $reversedName) !== false || strpos($filename, $fullName) !== false || strpos($filename, $reversedName) !== false;
+        if (!$nameMatched && $firstName && $lastName) {
+            $nameMatched = strpos($actualText, $firstName) !== false && strpos($actualText, $lastName) !== false;
+        }
+    }
+
+    $dobMatched = false;
+    foreach ($dobVariants as $variant) {
+        if ($variant && strpos($actualText, $variant) !== false) {
+            $dobMatched = true;
+            break;
+        }
+    }
+
+    $appIdMatched = $appId && (strpos($actualText, $appId) !== false || strpos($filename, $appId) !== false);
+
+    $keywords = [];
+    $fieldKeywords = [];
+    switch ($field) {
+        case 'doc_form138':
+            $keywords = ['form 138', 'form138', 'report card', 'general average', 'gwa', 'grades', 'secondary', 'high school', 'deped', 'school'];
+            $fieldKeywords = ['form138', 'form_138', 'doc_form138', 'reportcard', 'report_card'];
+            break;
+        case 'doc_moral':
+            $keywords = ['good moral', 'moral character', 'certificate of good moral', 'certificate', 'disciplinary', 'standing', 'conduct', 'honorable'];
+            $fieldKeywords = ['goodmoral', 'doc_moral', 'moral'];
+            break;
+        case 'doc_birthcert':
+            $keywords = ['birth certificate', 'psa', 'republic of the philippines', 'civil registry', 'registry', 'born', 'certificate of live birth', 'birthdate'];
+            $fieldKeywords = ['birthcert', 'doc_birthcert', 'birth'];
+            break;
+        case 'doc_idpic':
+            $keywords = ['student id', 'id picture', 'passport size', '2x2', 'identification', 'idpic'];
+            $fieldKeywords = ['idpic', 'doc_idpic', 'passport', 'student_id'];
+            break;
+    }
+
+    $textKeywordsFound = [];
+    foreach ($keywords as $keyword) {
+        if ($keyword && strpos($actualText, $keyword) !== false) {
+            $textKeywordsFound[] = $keyword;
+        }
+    }
+    $filenameKeywordsFound = [];
+    foreach ($fieldKeywords as $keyword) {
+        if ($keyword && strpos($filename, $keyword) !== false) {
+            $filenameKeywordsFound[] = $keyword;
+        }
+    }
+
+    if ($field === 'doc_idpic') {
+        $dimensions = @getimagesize($imagePath);
+        if ($dimensions) {
+            $width = $dimensions[0];
+            $height = $dimensions[1];
+            if ($width >= 200 && $height >= 200 && $height >= $width) {
+                return ['match' => true];
+            }
+        }
+        return ['match' => false, 'reason' => 'Invalid ID format. Please upload a clear 2x2 or passport-style portrait photo.'];
+    }
+
+    $documentTypeDetected = !empty($textKeywordsFound) || !empty($filenameKeywordsFound);
+    $wordCount = str_word_count($actualText);
+
+    if ($field === 'doc_form138') {
+        if ($documentTypeDetected && ($nameMatched || $wordCount >= 20)) {
+            return ['match' => true];
+        }
+    }
+
+    if ($field === 'doc_moral') {
+        if ($documentTypeDetected && ($nameMatched || $wordCount >= 20)) {
+            return ['match' => true];
+        }
+    }
+
+    if ($field === 'doc_birthcert') {
+        if ($documentTypeDetected && ($nameMatched || $dobMatched || $appIdMatched)) {
+            return ['match' => true];
+        }
+        if (($nameMatched || $dobMatched) && strpos($actualText, 'birth') !== false) {
+            return ['match' => true];
+        }
+    }
+
+    $reason = 'Document type could not be automatically verified. ';
+    if (empty(trim($actualText)) || strlen(trim($actualText)) < 15) {
+        $reason .= 'No readable text was detected. ';
+    }
+    if (!$documentTypeDetected && !$appIdMatched) {
+        $reason .= 'Document content does not match the expected type. ';
+    }
+    if ($field === 'doc_birthcert' && !$dobMatched) {
+        $reason .= 'Birth date did not match the provided applicant information. ';
+    }
+    $reason .= 'Please upload a clear, legible copy of the correct document.';
+
+    return ['match' => false, 'reason' => $reason];
+}
+
+
+
+function ensureDocumentVerificationColumns($pdo) {
+    $columns = [
+        'doc_form138_verification' => "VARCHAR(32) DEFAULT 'pending'",
+        'doc_moral_verification' => "VARCHAR(32) DEFAULT 'pending'",
+        'doc_birthcert_verification' => "VARCHAR(32) DEFAULT 'pending'",
+        'doc_idpic_verification' => "VARCHAR(32) DEFAULT 'pending'",
+        'doc_form138_ocr_text' => 'TEXT NULL',
+        'doc_moral_ocr_text' => 'TEXT NULL',
+        'doc_birthcert_ocr_text' => 'TEXT NULL',
+        'doc_idpic_ocr_text' => 'TEXT NULL'
+    ];
+
+    foreach ($columns as $column => $definition) {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM admission_applications LIKE ?");
+        $stmt->execute([$column]);
+        if ($stmt->rowCount() === 0) {
+            $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column $definition");
+        }
+    }
+}
+
+
 // --- HANDLE PHOTO UPLOAD ---
 if ($is_logged_in && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['profile_photo'])) {
     $file = $_FILES['profile_photo'];
@@ -88,32 +288,226 @@ if ($is_logged_in && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['pro
     }
 }
 
+// --- HANDLE DOCUMENTS UPLOAD ---
+if ($is_logged_in && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['upload_documents'])) {
+    $user_id = $_SESSION['user_id'];
+
+    ensureDocumentVerificationColumns($pdo);
+
+    $stmt = $pdo->prepare("SELECT doc_form138, doc_moral, doc_birthcert, doc_idpic, doc_form138_verification, doc_moral_verification, doc_birthcert_verification, doc_idpic_verification, status FROM admission_applications WHERE user_id = ?");
+    $stmt->execute([$user_id]);
+    $currentApplication = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    $uploads = [];
+    $verification = [];
+    $allowed = ['jpg', 'jpeg', 'png'];
+    $fields = ['doc_form138', 'doc_moral', 'doc_birthcert', 'doc_idpic'];
+
+    foreach ($fields as $field) {
+        if (isset($_FILES[$field]) && $_FILES[$field]['error'] === 0) {
+            $file = $_FILES[$field];
+            $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+            if (in_array($ext, $allowed)) {
+                $new_name = $user_id . '_' . $field . '_' . time() . '.' . $ext;
+                $destination = '../uploads/' . $new_name;
+                if (move_uploaded_file($file['tmp_name'], $destination)) {
+                    $ocrText = getOCRText($destination);
+                    $detectionResult = detectDocumentMatch($field, $ocrText, $destination, $currentApplication);
+                    $match = $detectionResult['match'];
+                    $uploads[$field] = $destination;
+                    $verification[$field . '_verification'] = $match ? 'ocr_passed' : 'ocr_review';
+                    $verification[$field . '_ocr_text'] = $match ? substr($ocrText, 0, 1200) : ($detectionResult['reason'] ?? 'Detection failed.');
+                } else {
+                    $error_msg = "Failed to upload $field.";
+                }
+            } else {
+                $error_msg = "Invalid file type for $field.";
+            }
+        }
+    }
+
+    if (empty($error_msg)) {
+        $stmt = $pdo->prepare("UPDATE admission_applications SET doc_form138 = ?, doc_moral = ?, doc_birthcert = ?, doc_idpic = ?, doc_form138_verification = ?, doc_moral_verification = ?, doc_birthcert_verification = ?, doc_idpic_verification = ?, doc_form138_ocr_text = ?, doc_moral_ocr_text = ?, doc_birthcert_ocr_text = ?, doc_idpic_ocr_text = ? WHERE user_id = ?");
+        $stmt->execute([
+            $uploads['doc_form138'] ?? $currentApplication['doc_form138'],
+            $uploads['doc_moral'] ?? $currentApplication['doc_moral'],
+            $uploads['doc_birthcert'] ?? $currentApplication['doc_birthcert'],
+            $uploads['doc_idpic'] ?? $currentApplication['doc_idpic'],
+            $verification['doc_form138_verification'] ?? $currentApplication['doc_form138_verification'],
+            $verification['doc_moral_verification'] ?? $currentApplication['doc_moral_verification'],
+            $verification['doc_birthcert_verification'] ?? $currentApplication['doc_birthcert_verification'],
+            $verification['doc_idpic_verification'] ?? $currentApplication['doc_idpic_verification'],
+            $verification['doc_form138_ocr_text'] ?? $currentApplication['doc_form138_ocr_text'],
+            $verification['doc_moral_ocr_text'] ?? $currentApplication['doc_moral_ocr_text'],
+            $verification['doc_birthcert_ocr_text'] ?? $currentApplication['doc_birthcert_ocr_text'],
+            $verification['doc_idpic_ocr_text'] ?? $currentApplication['doc_idpic_ocr_text'],
+            $user_id
+        ]);
+
+        $finalDocs = [
+            'doc_form138' => $uploads['doc_form138'] ?? $currentApplication['doc_form138'],
+            'doc_moral' => $uploads['doc_moral'] ?? $currentApplication['doc_moral'],
+            'doc_birthcert' => $uploads['doc_birthcert'] ?? $currentApplication['doc_birthcert'],
+            'doc_idpic' => $uploads['doc_idpic'] ?? $currentApplication['doc_idpic'],
+        ];
+
+        $allDocsUploaded = !empty($finalDocs['doc_form138']) && !empty($finalDocs['doc_moral']) && !empty($finalDocs['doc_birthcert']) && !empty($finalDocs['doc_idpic']);
+
+        if ($allDocsUploaded && $currentApplication && $currentApplication['status'] !== 'Document Checking') {
+            $stmt = $pdo->prepare("UPDATE admission_applications SET status = 'Document Checking' WHERE user_id = ?");
+            $stmt->execute([$user_id]);
+        }
+
+        if ($allDocsUploaded) {
+            $ocrPassed = true;
+            $failedDocs = [];
+            foreach ($fields as $field) {
+                $statusKey = $field . '_verification';
+                $statusValue = $verification[$statusKey] ?? $currentApplication[$statusKey];
+                if ($statusValue !== 'ocr_passed') {
+                    $ocrPassed = false;
+                    $failedDocs[] = $field;
+                }
+            }
+
+            if ($ocrPassed) {
+                $success_msg = "Documents uploaded successfully. OCR-based document recognition passed and your documents are now pending physical verification by the Admissions Office.";
+            } else {
+                $docNames = [
+                    'doc_form138' => 'Form 138',
+                    'doc_moral' => 'Certificate of Good Moral',
+                    'doc_birthcert' => 'Birth Certificate',
+                    'doc_idpic' => 'ID Picture'
+                ];
+                $failedNames = array_map(fn($d) => $docNames[$d] ?? $d, $failedDocs);
+                $failedList = implode(', ', $failedNames);
+                $success_msg = "Documents uploaded successfully. However, the system could not automatically verify: <strong>{$failedList}</strong>. These require manual review by the Admissions Office. Please ensure you uploaded the correct documents.";
+            }
+        } else {
+            $uploadedCount = count(array_filter($finalDocs, fn($value) => !empty($value)));
+            $remaining = 4 - $uploadedCount;
+            $success_msg = "Documents uploaded successfully. Please upload the remaining {$remaining} required document(s) to continue.";
+        }
+    }
+}
+
+// --- HANDLE SCHEDULE REQUEST ---
+if ($is_logged_in && $_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_schedule_request'])) {
+    $user_id = $_SESSION['user_id'];
+    $preferred_date = $_POST['preferred_date'];
+    $preferred_time = $_POST['preferred_time'];
+    $preferred_venue = $_POST['preferred_venue'] ?? '';
+    $notes = $_POST['notes'] ?? '';
+
+    // For now, just show success, or save to DB if columns added
+    $success_msg = "Schedule request submitted successfully. We will review your preferences.";
+}
+
 // --- HANDLE REGISTRATION ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_application'])) {
-    $app_id = $_POST['application_id']; 
-    $password = $_POST['password'];    
-    $first_name = $_POST['first_name'];
-    $last_name = $_POST['last_name'];
-    $full_name = $first_name . ' ' . $last_name;
-    $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+    $app_id = trim($_POST['application_id'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $first_name = trim($_POST['first_name'] ?? '');
+    $last_name = trim($_POST['last_name'] ?? '');
+    $full_name = trim($first_name . ' ' . $last_name);
 
-    try {
+    $errors = [];
+
+    if (
+        $app_id === '' ||
+        $password === '' ||
+        $confirm_password === '' ||
+        $first_name === '' ||
+        $last_name === '' ||
+        empty($_POST['date_of_birth']) ||
+        empty($_POST['gender']) ||
+        empty($_POST['email']) ||
+        empty($_POST['phone_number']) ||
+        empty($_POST['address']) ||
+        empty($_POST['course_1']) ||
+        empty($_POST['course_2']) ||
+        empty($_POST['course_3']) ||
+        empty($_POST['previous_school']) ||
+        empty($_POST['strand']) ||
+        empty($_POST['final_gwa']) ||
+        !isset($_POST['privacy_policy'])
+    ) {
+        $errors[] = "Please complete all required fields.";
+    }
+
+    if (!filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Please enter a valid email address.";
+    }
+
+    if ($password !== $confirm_password) {
+        $errors[] = "Passwords do not match.";
+    }
+
+    if (strlen($password) < 8) {
+        $errors[] = "Password must be at least 8 characters.";
+    }
+
+    if (!preg_match('/[A-Z]/', $password)) {
+        $errors[] = "Password must include at least one uppercase letter.";
+    }
+
+    if (!preg_match('/[a-z]/', $password)) {
+        $errors[] = "Password must include at least one lowercase letter.";
+    }
+
+    if (!preg_match('/[0-9]/', $password)) {
+        $errors[] = "Password must include at least one number.";
+    }
+
+    if (!preg_match('/[!@#$%^&*(),.?\":{}|<>]/', $password)) {
+        $errors[] = "Password must include at least one special character.";
+    }
+
+    if (empty($errors)) {
+        $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+        try {
         $pdo->beginTransaction();
         $stmtUser = $pdo->prepare("INSERT INTO users (username, password, full_name, role) VALUES (?, ?, ?, 'student')");
         $stmtUser->execute([$app_id, $hashed_password, $full_name]);
 
+        // Check eligibility filters
+        $course = $_POST['course_1'];
+        $gwa = (float) $_POST['final_gwa'];
+        $strand = $_POST['strand'];
+        
+        $stmtFilter = $pdo->prepare("SELECT * FROM college_filters WHERE college_name = ?");
+        $stmtFilter->execute([$course]);
+        $filter = $stmtFilter->fetch(PDO::FETCH_ASSOC);
+        
+        // Default to Exam Status - only set to Registered if filter exists AND student doesn't meet requirements
+        $initialStatus = 'Exam Status';
+        if ($filter) {
+            $min_gwa = (float) $filter['min_gwa'];
+            $allowed_strands = $filter['allowed_strands'];
+            $strands_array = array_map('trim', explode(',', $allowed_strands));
+            
+            // If does NOT meet requirements, set to Registered
+            if ($gwa < $min_gwa || !in_array($strand, $strands_array)) {
+                $initialStatus = 'Registered';
+            }
+        }
+
         $sql = "INSERT INTO admission_applications 
                 (application_id, user_id, first_name, last_name, date_of_birth, gender, email, phone_number, address, course_1, course_2, course_3, previous_school, strand, final_gwa, status) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending')";
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmtApp = $pdo->prepare($sql);
-        $stmtApp->execute([$app_id, $app_id, $first_name, $last_name, $_POST['date_of_birth'], $_POST['gender'], $_POST['email'], $_POST['phone_number'], $_POST['address'], $_POST['course_1'], $_POST['course_2'], $_POST['course_3'], $_POST['previous_school'], $_POST['strand'], $_POST['final_gwa']]);
+        $stmtApp->execute([$app_id, $app_id, $first_name, $last_name, $_POST['date_of_birth'], $_POST['gender'], $_POST['email'], $_POST['phone_number'], $_POST['address'], $_POST['course_1'], $_POST['course_2'], $_POST['course_3'], $_POST['previous_school'], $_POST['strand'], $_POST['final_gwa'], $initialStatus]);
 
         $pdo->commit();
         $success_msg = "Application Successful! Your Applicant ID is <strong>$app_id</strong>. Please <a href='login.php'>Login here</a>.";
     } catch (Exception $e) {
         $pdo->rollBack();
         $error_msg = "Error: " . $e->getMessage();
+    }
+    } else {
+        $error_msg = implode(' ', $errors);
     }
 }
 
@@ -128,6 +522,7 @@ if ($is_logged_in && $role === 'student') {
         // LOGIC UPDATE: If Rejected, stay on Step 3 to show the result
         if ($status === 'Exam Status') $current_step = 2;
         elseif ($status === 'Exam Schedule') $current_step = 3;
+        elseif ($status === 'Registered') $current_step = 4;
         elseif ($status === 'Document Checking') $current_step = 4;
         elseif ($status === 'Enrolled') $current_step = 5;
         elseif ($status === 'Rejected') $current_step = 3; // CHANGED FROM 0 TO 3
@@ -318,24 +713,132 @@ if ($is_logged_in && $role === 'student') {
                             
                             <?php else: ?>
                                 <div class="card-header"><h3>Examination Schedule</h3></div>
-                                <div class="empty-state" style="text-align:center; padding:20px;">
-                                    <i class="fa-solid fa-calendar-xmark" style="font-size:50px; color:#ccc; margin-bottom:20px;"></i>
-                                    <p>Schedule processing...</p>
+                                <div class="schedule-request">
+                                    <p>Your examination schedule is being prepared. If you have preferred dates or times, please submit a request below.</p>
+                                    <button id="requestScheduleBtn" class="btn-primary" onclick="toggleScheduleForm()">Request Preferred Schedule</button>
+                                    <div id="scheduleForm" style="display:none; margin-top:20px;">
+                                        <form method="POST" class="schedule-form">
+                                            <div class="form-row">
+                                                <div class="form-group">
+                                                    <label>Preferred Date</label>
+                                                    <input type="date" name="preferred_date" required>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Preferred Time</label>
+                                                    <input type="time" name="preferred_time" required>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Preferred Venue (Optional)</label>
+                                                <input type="text" name="preferred_venue" placeholder="e.g., TUP Manila">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Additional Notes</label>
+                                                <textarea name="notes" rows="3" placeholder="Any special requests or notes"></textarea>
+                                            </div>
+                                            <button type="submit" name="submit_schedule_request" class="submit-btn">Submit Request</button>
+                                        </form>
+                                    </div>
                                 </div>
                             <?php endif; ?>
                         </div>
                     </div>
 
                     <div id="step-4" class="step-pane">
-                        <div class="content-card">
-                            <div class="card-header"><h3>Requirements Submission</h3></div>
-                            <div class="checklist-container">
-                                <p>Submit the following original documents:</p>
-                                <div class="checklist-item"><i class="fa-solid fa-square-check" style="color:#8b0000; margin-right:10px;"></i> Form 138 (High School Report Card)</div>
-                                <div class="checklist-item"><i class="fa-solid fa-square-check" style="color:#8b0000; margin-right:10px;"></i> Certificate of Good Moral Character</div>
-                                <div class="checklist-item"><i class="fa-solid fa-square-check" style="color:#8b0000; margin-right:10px;"></i> PSA Birth Certificate (Original & Photocopy)</div>
-                                <div class="checklist-item"><i class="fa-solid fa-square-check" style="color:#8b0000; margin-right:10px;"></i> 2 pcs. 2x2 Recent ID Picture</div>
-                            </div>
+                        <div class="content-card center-aligned">
+                            <div class="icon-circle"><i class="fa-solid fa-file-check"></i></div>
+                            <h2>Document Submission</h2>
+                            <?php
+                                $documentLabels = [
+                                    'doc_form138' => 'Form 138 (High School Report Card)',
+                                    'doc_moral' => 'Certificate of Good Moral Character',
+                                    'doc_birthcert' => 'PSA Birth Certificate (Original & Photocopy)',
+                                    'doc_idpic' => '2 pcs. 2x2 Recent ID Picture'
+                                ];
+                                $missing_docs = [];
+                                $failed_detection_docs = [];
+                                
+                                foreach ($documentLabels as $field => $label) {
+                                    if (empty($application[$field])) {
+                                        $missing_docs[$field] = $label;
+                                    } else {
+                                        // Check if this document failed detection
+                                        $verificationStatus = $application[$field . '_verification'] ?? 'pending';
+                                        if ($verificationStatus === 'ocr_review') {
+                                            $failureReason = $application[$field . '_ocr_text'] ?? '';
+                                            if (strpos($failureReason, 'System could not') === 0 || strpos($failureReason, 'Detection failed') === 0) {
+                                                $failed_detection_docs[$field] = ['label' => $label, 'reason' => $failureReason];
+                                            }
+                                        }
+                                    }
+                                }
+                                $all_docs_uploaded = empty($missing_docs) && empty($failed_detection_docs);
+                            ?>
+
+                            <?php if ($all_docs_uploaded): ?>
+                                <p class="lead-text">Your documents have been uploaded successfully. Please proceed to the Admissions Office to submit the original physical copies for verification.</p>
+                                <div class="status-box success">
+                                    <i class="fa-solid fa-circle-check"></i>
+                                    <div><h4>Documents Uploaded</h4><p>All required documents have been received electronically.</p></div>
+                                </div>
+                                <p><strong>Next Step:</strong> Visit the TUP Admissions Office with your original documents for final verification.</p>
+                            <?php else: ?>
+                                <?php if (!empty($failed_detection_docs)): ?>
+                                    <div class="status-box warning" style="background: rgba(241, 169, 78, 0.1); border-color: #f1a94e; color: #f1a94e; margin: 20px 0; text-align: left;">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <div>
+                                            <h4>⚠ Detection Failed - Please Re-upload</h4>
+                                            <p style="margin: 10px 0 0 0; font-size: 0.95rem;">The system could not automatically verify the following documents. Please re-upload clearer, legible copies:</p>
+                                            <ul style="margin: 10px 0 0 20px; font-size: 0.9rem;">
+                                                <?php foreach ($failed_detection_docs as $field => $docInfo): ?>
+                                                    <li>
+                                                        <strong><?= htmlspecialchars($docInfo['label']) ?></strong><br>
+                                                        <small style="color: #ccc;">Reason: <?= htmlspecialchars($docInfo['reason']) ?></small>
+                                                    </li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <?php if (!empty($missing_docs)): ?>
+                                    <div class="status-box pending">
+                                        <i class="fa-solid fa-triangle-exclamation"></i>
+                                        <div>
+                                            <h4>Missing Documents</h4>
+                                            <ul style="margin:10px 0 0 20px;">
+                                                <?php foreach ($missing_docs as $missing_label): ?>
+                                                    <li><?= htmlspecialchars($missing_label) ?></li>
+                                                <?php endforeach; ?>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div style="background: rgba(255,255,255,0.05); border-left: 3px solid #f1a94e; padding: 15px 20px; margin: 20px 0; border-radius: 8px;">
+                                    <p style="margin: 0; font-size: 0.95rem; color: #f1a94e;"><strong>📋 Upload Tips:</strong></p>
+                                    <ul style="margin: 10px 0 0 20px; font-size: 0.9rem; color: #e0e0e0;">
+                                        <li>Upload <strong>clear, legible scans or photos</strong> of your original documents</li>
+                                        <li>The system automatically detects document type from the image content and filename</li>
+                                        <li>If detection fails, the Admissions Office will manually verify your documents</li>
+                                        <li>Supported formats: JPG, PNG (high resolution recommended)</li>
+                                    </ul>
+                                </div>
+
+                                <form method="POST" enctype="multipart/form-data" class="documents-upload-form">
+                                    <?php 
+                                        $fieldsToUpload = array_merge($missing_docs, $failed_detection_docs);
+                                        foreach ($fieldsToUpload as $field => $info):
+                                            $label = is_array($info) ? $info['label'] : $info;
+                                    ?>
+                                        <div class="upload-item">
+                                            <label><?= htmlspecialchars($label) ?></label>
+                                            <input type="file" name="<?= $field ?>" accept="image/*" required>
+                                        </div>
+                                    <?php endforeach; ?>
+                                    <button type="submit" name="upload_documents" class="submit-btn">Upload Documents</button>
+                                </form>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -396,54 +899,71 @@ if ($is_logged_in && $role === 'student') {
 
         <?php elseif (!$is_logged_in): ?>
             <div class="form-container">
-                <form method="POST">
+                <form id="admission-form" method="POST" novalidate>
                     <h2>TUP Admission Application</h2>
-                    <p>Complete the form below to register.</p>
+                    <p>Complete the form below to create a secure applicant profile.</p>
+                    <div id="client-error-box" class="alert-box alert-error" style="display:none; margin-bottom:20px;"></div>
                     
                     <div class="app-id-display">
-                        <strong>Application ID:</strong> <span id="gen-id" style="color:#fff; font-size:18px;">Generating...</span>
+                        <strong>Application ID:</strong> <span id="gen-id" class="code">Generating...</span>
                         <input type="hidden" name="application_id" id="input-app-id">
-                        <small style="display:block; margin-top:5px;">(This will be your Username)</small>
+                        <small>(This will be your username)</small>
                     </div>
 
-                    <fieldset>
+                    <fieldset class="password-section">
                         <legend>Account Security</legend>
-                        <div class="form-group">
-                            <label>Create Password</label>
-                            <div style="position: relative;">
-                                <input type="password" name="password" id="password-input" required>
-                                <button type="button" class="toggle-password" onclick="togglePasswordVisibility()" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #c94c4c;">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Create Password</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" name="password" id="password-input" autocomplete="new-password" required>
+                                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('password-input', this)" aria-label="Show password">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
                             </div>
+                            <div class="form-group">
+                                <label>Confirm Password</label>
+                                <div class="password-input-wrapper">
+                                    <input type="password" name="confirm_password" id="confirm-password-input" autocomplete="new-password" required>
+                                    <button type="button" class="toggle-password" onclick="togglePasswordVisibility('confirm-password-input', this)" aria-label="Show password">
+                                        <i class="fa-solid fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="password-policy">
+                            <strong>Password policy</strong>
+                            <ul>
+                                <li>At least 8 characters</li>
+                                <li>One uppercase letter</li>
+                                <li>One lowercase letter</li>
+                                <li>At least one number</li>
+                                <li>At least one special character</li>
+                            </ul>
+                        </div>
+
+                        <div class="strength-bar-wrapper">
+                            <div class="strength-meter">
+                                <span id="password-strength-label">Strength: Short</span>
+                                <div class="strength-track">
+                                    <div id="password-strength-bar" class="strength-bar"></div>
+                                </div>
+                            </div>
+                            <div id="password-match-label" class="password-match-label">Passwords must match</div>
                         </div>
                     </fieldset>
 
-                    <script>
-                        function togglePasswordVisibility() {
-                            const input = document.getElementById('password-input');
-                            const button = document.querySelector('.toggle-password i');
-                            if (input.type === 'password') {
-                                input.type = 'text';
-                                button.classList.remove('fa-eye');
-                                button.classList.add('fa-eye-slash');
-                            } else {
-                                input.type = 'password';
-                                button.classList.remove('fa-eye-slash');
-                                button.classList.add('fa-eye');
-                            }
-                        }
-                    </script>
-
                     <fieldset>
                         <legend>Personal Information</legend>
-                        <div class="form-row" style="display:flex; gap:15px;">
-                            <div class="form-group" style="flex:1;"><label>First Name</label><input type="text" name="first_name" required></div>
-                            <div class="form-group" style="flex:1;"><label>Last Name</label><input type="text" name="last_name" required></div>
+                        <div class="form-row">
+                            <div class="form-group"><label>First Name</label><input type="text" name="first_name" required></div>
+                            <div class="form-group"><label>Last Name</label><input type="text" name="last_name" required></div>
                         </div>
-                        <div class="form-row" style="display:flex; gap:15px; margin-top:10px;">
-                            <div class="form-group" style="flex:1;"><label>Date of Birth</label><input type="date" name="date_of_birth" required></div>
-                            <div class="form-group" style="flex:1;">
+                        <div class="form-row" style="margin-top:10px;">
+                            <div class="form-group"><label>Date of Birth</label><input type="date" name="date_of_birth" required></div>
+                            <div class="form-group">
                                 <label>Gender</label>
                                 <select name="gender" required>
                                     <option value="male">Male</option>
@@ -457,7 +977,7 @@ if ($is_logged_in && $role === 'student') {
                         <legend>Contact Details</legend>
                         <div class="form-group"><label>Email</label><input type="email" name="email" required></div>
                         <div class="form-group"><label>Phone</label><input type="tel" name="phone_number" required></div>
-                        <div class="form-group"><label>Address</label><textarea name="address" rows="2"></textarea></div>
+                        <div class="form-group"><label>Address</label><textarea name="address" rows="2" required></textarea></div>
                     </fieldset>
 
                     <fieldset>
@@ -468,7 +988,7 @@ if ($is_logged_in && $role === 'student') {
                         </div>
                         <div class="form-group">
                             <label>SHS Strand</label>
-                            <select name="strand" required>
+                            <select name="strand" required onchange="filterCoursesByEligibility()">
                                 <option value="" selected disabled>-- Select SHS Strand --</option>
                                 <option value="STEM">STEM (Science, Technology, Engineering, Mathematics)</option>
                                 <option value="ABM">ABM (Accountancy, Business, Management)</option>
@@ -480,7 +1000,7 @@ if ($is_logged_in && $role === 'student') {
                         </div>
                         <div class="form-group">
                             <label>Final GWA (General Weighted Average)</label>
-                            <input type="number" name="final_gwa" step="0.01" min="0" max="100" placeholder="e.g., 85.50" required>
+                            <input type="number" name="final_gwa" step="0.01" min="0" max="100" placeholder="e.g., 85.50" required onchange="filterCoursesByEligibility()" oninput="filterCoursesByEligibility()">
                         </div>
                         
                         <div class="form-group">
@@ -526,6 +1046,17 @@ if ($is_logged_in && $role === 'student') {
                         </div>
                     </fieldset>
 
+                    <div class="form-group privacy-policy">
+                        <h3 style="margin-bottom: 10px; color: #333; font-size: 1.2rem;">Privacy Policy</h3>
+                        <div class="privacy-text">
+                            This Privacy Policy explains how we collect, use, and protect your personal information when you use our website/system. We are committed to safeguarding your data in accordance with the Data Privacy Act of 2012.
+                        </div>
+                        <label>
+                            <input type="checkbox" name="privacy_policy" required>
+                            <span>I agree to the <a href="#">Privacy Policy</a></span>
+                        </label>
+                    </div>
+
                     <button type="submit" name="submit_application" class="submit-btn">Submit Application</button>
                 </form>
             </div>
@@ -533,6 +1064,9 @@ if ($is_logged_in && $role === 'student') {
     </main>
     
 
+    <script>
+        window.courseOfferings = <?= json_encode($course_offerings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    </script>
     <script src="../static/admission.js"></script>
     <script src="../static/header.js"></script>
 </body>

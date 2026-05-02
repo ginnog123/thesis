@@ -81,6 +81,10 @@ $conn->close();
             <a href="register_admin.php" class="nav-link">
                 <i class="fa-solid fa-user-shield"></i> New Admin
             </a>
+            <a href="eligibility_filters.php" class="nav-link" onclick="showFiltersSection()">
+                <i class="fa-solid fa-filter"></i> Eligibility Filters
+            </a>
+            
             <a href="logout.php" class="nav-link logout">
                 <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
             </a>
@@ -95,7 +99,7 @@ $conn->close();
             </div>
             <div style="background: white; padding: 10px 20px; border-radius: 20px; display: flex; align-items: center; gap: 10px; box-shadow: var(--shadow);">
                 <span style="height: 10px; width: 10px; background: #05CD99; border-radius: 50%; display: inline-block;"></span>
-                <span style="font-weight: 600; font-size: 14px; color: var(--text-main);">Live System Status</span>
+                <span style="font-weight: 600; font-size: 14px; color: black;">Live System Status</span>
             </div>
         </header>
 

@@ -59,28 +59,32 @@ try {
     <div class="admin-container">
         <?php if (!$is_first_run): ?>
         <aside class="sidebar">
-        <div class="sidebar-header">
-            <img src="../images/logo tup .svg" alt="TUP Logo" class="admin-logo">
-            <h3>TUP ADMIN</h3>
-        </div>
-        <nav class="sidebar-nav">
-            <a href="admin_dashboard.php" class="nav-link">
-                <i class="fa-solid fa-house"></i> Dashboard
-            </a>
-            <a href="analytics.php" class="nav-link">
-                <i class="fa-solid fa-chart-pie"></i> Analytics
-            </a>
-            <a href="register_admin.php" class="nav-link active">
-                <i class="fa-solid fa-user-shield"></i> New Admin
-            </a>
-            <a href="logout.php" class="nav-link logout">
-                <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
-            </a>
-        </nav>
-    </aside>
+            <div class="sidebar-header">
+                <img src="../images/logo tup .svg" alt="TUP Logo" class="admin-logo">
+                <h3>TUP ADMIN</h3>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="admin_dashboard.php" class="nav-link">
+                    <i class="fa-solid fa-house"></i> Dashboard
+                </a>
+                <a href="analytics.php" class="nav-link">
+                    <i class="fa-solid fa-chart-pie"></i> Analytics
+                </a>
+                <a href="register_admin.php" class="nav-link active">
+                    <i class="fa-solid fa-user-shield"></i> New Admin
+                </a>
+                <a href="eligibility_filters.php" class="nav-link">
+                    <i class="fa-solid fa-filter"></i> Eligibility Filters
+                </a>
+                <a href="logout.php" class="nav-link logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Logout
+                </a>
+            </nav>
+        </aside>
         <?php endif; ?>
 
-        <main class="content-area" style="<?= $is_first_run ? 'margin:0 auto; max-width:600px;' : '' ?>">
+        <!-- Added dynamic class to shift content when sidebar is present -->
+        <main class="content-area <?= $is_first_run ? 'setup-mode' : '' ?>">
             <header class="top-header">
                 <h2><?= $is_first_run ? 'System Initialization' : 'Administrative Management' ?></h2>
             </header>
@@ -113,9 +117,10 @@ try {
                         <div class="input-group">
                             <label><i class="fa-solid fa-key"></i> Password</label>
                             <input type="password" name="password" id="passInput" placeholder="Minimum 8 characters" required>
-                            <small id="passStrength"></small>
                         </div>
-                        <button type="submit" class="btn-submit"><?= $is_first_run ? 'Complete Setup' : 'Register Administrator' ?></button>
+                        <button type="submit" class="btn-submit">
+                            <?= $is_first_run ? 'Complete Setup' : 'Register Administrator' ?>
+                        </button>
                     </form>
                     <?php endif; ?>
                 </div>
