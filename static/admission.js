@@ -61,16 +61,8 @@ window.addEventListener('load', function () {
 
   const loadEligibilityFilters = () => {
     if (!window.courseOfferings) return;
-    fetch('get_filters.php')
-      .then(response => response.json())
-      .then(data => {
-        window.eligibilityFilters.length = 0;
-        window.eligibilityFilters.push(...data);
-        filterCoursesByEligibility();
-      })
-      .catch(() => {
-        filterCoursesByEligibility();
-      });
+    // Data is now passed directly from admission.php, so we no longer need fetch()
+    filterCoursesByEligibility();
   };
 
   loadEligibilityFilters();

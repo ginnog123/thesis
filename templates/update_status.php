@@ -14,8 +14,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$app_id]);
 
     } elseif ($action === 'set_exam') {
+        // 1. Split the comma-separated IDs into an array
+        $app_ids = explode(',', $app_id);
+        
+        // 2. Prepare the statement once
         $stmt = $pdo->prepare("UPDATE admission_applications SET status = 'Exam Schedule', exam_date = ?, exam_time = ?, exam_venue = ? WHERE application_id = ?");
-        $stmt->execute([$_POST['exam_date'], $_POST['exam_time'], $_POST['exam_venue'], $app_id]);
+        
+        // 3. Loop through each ID and execute the update
+        foreach ($app_ids as $id) {
+            $stmt->execute([$_POST['exam_date'], $_POST['exam_time'], $_POST['exam_venue'], trim($id)]);
+        }
 
     } elseif ($action === 'exam_passed') {
         $stmt = $pdo->prepare("UPDATE admission_applications SET status = 'Document Checking' WHERE application_id = ?");

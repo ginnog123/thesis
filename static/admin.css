@@ -495,10 +495,19 @@ tr:hover td {
 .sub-nav {
   display: flex;
   gap: 10px;
-  margin-bottom: 25px;
+  margin-bottom: 10px;
   border-bottom: 1px solid var(--border-color);
   padding-bottom: 10px;
   flex-wrap: wrap;
+}
+
+#th-checkbox, 
+.td-checkbox {
+    width: 60px;
+    min-width: 60px;
+    max-width: 60px;
+    text-align: center;
+    padding-left: 10px;
 }
 
 .tab-btn {
@@ -512,6 +521,7 @@ tr:hover td {
   border-radius: 8px;
   transition: all 0.3s ease;
 }
+
 
 .tab-btn:hover {
   color: white;
@@ -529,7 +539,7 @@ tr:hover td {
   min-width: auto;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
 
 .btn-action.view {
@@ -566,7 +576,7 @@ tr:hover td {
 
 .table-section table th:nth-child(3),
 .table-section table td:nth-child(3) {
-  width: 250px;
+  width: 200px;
   min-width: 200px;
   max-width: 300px;
   white-space: normal;
