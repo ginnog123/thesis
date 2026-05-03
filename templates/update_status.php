@@ -3,8 +3,8 @@ session_start();
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') { exit; }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $host = "localhost"; $dbname = "tup_system"; $dbuser = "root"; $dbpass = "";
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $dbuser, $dbpass);
+    require_once 'db.php';
+    $pdo = getPDO();
 
     $action = $_POST['action'];
     $app_id = $_POST['app_id'];

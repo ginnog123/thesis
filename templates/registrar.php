@@ -3,9 +3,12 @@ mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 try {
     $db = new mysqli("localhost", "root", "", "registrar_db");
+    if ($db->connect_errno) {
+        throw new Exception($db->connect_error, $db->connect_errno);
+    }
     $db->set_charset("utf8mb4");
-} catch (Exception $e) {
-    die("Database connection failed.");
+} catch (Throwable $e) {
+    die("Database connection failed: (" . htmlspecialchars($e->getCode()) . ") " . htmlspecialchars($e->getMessage()));
 }
 
 date_default_timezone_set('Asia/Manila');
@@ -129,12 +132,14 @@ function submit_request($db) {
     $contact = $_POST['contact'] ?? '';
     $document = $_POST['document'] ?? '';
 
+    header('Content-Type: application/json');
+
     if (!$name || !$tup_id || !$course || !$email || !$contact || !$document) {
-        echo "All fields are required.";
+        echo json_encode(['success' => false, 'message' => 'All fields are required.']);
         return;
     }
 
-    $request_id = "TUP-" . strtoupper(uniqid());
+    $request_id = 'TUP-' . strtoupper(uniqid());
     $date_requested = date('Y-m-d H:i:s');
 
     $stmt = $db->prepare(
@@ -144,7 +149,7 @@ function submit_request($db) {
     );
 
     $stmt->bind_param(
-        "ssssssss",
+        'ssssssss',
         $request_id,
         $name,
         $tup_id,
@@ -156,7 +161,20 @@ function submit_request($db) {
     );
 
     $stmt->execute();
-    echo "Request submitted successfully!";
+    echo json_encode([
+        'success' => true,
+        'message' => 'Request submitted successfully!',
+        'request' => [
+            'request_id' => $request_id,
+            'student_name' => $name,
+            'tup_id' => $tup_id,
+            'course' => $course,
+            'email' => $email,
+            'contact' => $contact,
+            'document' => $document,
+            'date_requested' => $date_requested,
+        ],
+    ]);
 }
 
 function load_document_types($db) {
@@ -272,9 +290,6 @@ function load_document_types($db) {
             </div>
             
             <button class="clear-btn" onclick="clearFilters()">Clear Filters</button>
-              <button class="clear-btn" onclick="openSubmitPopup()">
-    + Submit Request
-  </button>
         </div>
 
 

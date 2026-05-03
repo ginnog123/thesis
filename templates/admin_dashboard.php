@@ -5,10 +5,10 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     exit;
 }
 
-$host = "localhost"; $dbname = "tup_system"; $dbuser = "root"; $dbpass = "";
+require_once 'db.php';
+
 try {
-    $pdo = new PDO("mysql:host=$host;dbname=$dbname", $dbuser, $dbpass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo = getPDO();
 
     // Fetch Stats
     $stats = [
