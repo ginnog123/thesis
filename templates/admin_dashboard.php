@@ -122,22 +122,39 @@ try {
                 <button class="tab-btn" onclick="filterTable('Enrolled')">Enrolled</button>
             </div>
 
-            <div style="overflow-x: auto;">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>App ID</th>
-                            <th>Student Name</th>
-                            <th>Priority Course</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="appTableBody">
-                        <?php foreach ($applications as $app): ?>
-                        <tr data-status="<?= $app['status'] ?>">
-                            <td><strong><?= htmlspecialchars($app['application_id']) ?></strong></td>
-                            <td><?= htmlspecialchars($app['first_name'] . ' ' . $app['last_name']) ?></td>
+            <div id="batchActionContainer" style="display:none; margin-bottom: 8px; margin-top: 8px;">
+    <button onclick="openBatchScheduleModal()" class="btn-action schedule" style="padding: 10px 15px; font-size: 14px;">
+        <i class="fa-solid fa-calendar-plus"></i> Schedule Selected Applicants
+    </button>
+</div>
+
+<div style="overflow-x: auto;">
+    <table>
+        <thead>
+            <tr>
+                <!-- 2. Add Select All Checkbox -->
+                <th id="th-checkbox" style="display:none;">
+                    <input type="checkbox" id="selectAllExams" onclick="toggleAllExams(this)">
+                </th>
+                <th>App ID</th>
+                <th>Student Name</th>
+                <th>Priority Course</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="appTableBody">
+            <?php foreach ($applications as $app): ?>
+            <tr data-status="<?= $app['status'] ?>">
+                <!-- 3. Add Individual Checkboxes -->
+                <td class="td-checkbox" style="display:none;">
+                    <?php if ($app['status'] === 'Exam Status'): ?>
+                        <input type="checkbox" class="batch-exam-cb" value="<?= htmlspecialchars($app['application_id']) ?>">
+                    <?php endif; ?>
+                </td>
+                
+                <td><strong><?= htmlspecialchars($app['application_id']) ?></strong></td>
+                <td><?= htmlspecialchars($app['first_name'] . ' ' . $app['last_name']) ?></td>
                             <td><?= htmlspecialchars($app['course_1']) ?></td>
                             <td>
                                 <span class="badge badge-<?= strtolower(str_replace(' ', '-', $app['status'])) ?>">
@@ -309,8 +326,8 @@ try {
 
     <script src="../static/admin.js"></script>
     <script>
-        function filterTable(status) {
-                
+        // Update your existing filterTable function to show/hide the batch checkboxes
+            function filterTable(status) {
                 const tabs = document.querySelectorAll('.tab-btn');
                 tabs.forEach(tab => {
                     tab.classList.remove('active');
@@ -326,11 +343,79 @@ try {
                         row.style.display = '';
                     } else {
                         row.style.display = 'none';
+                        // Uncheck hidden rows
+                        const cb = row.querySelector('.batch-exam-cb');
+                        if (cb) cb.checked = false; 
                     }
                 });
+
+                // Show batch features ONLY when "For Exam" is selected
+                const isExamTab = (status === 'Exam Status');
+                document.getElementById('batchActionContainer').style.display = isExamTab ? 'block' : 'none';
+                document.getElementById('th-checkbox').style.display = isExamTab ? 'table-cell' : 'none';
+                document.querySelectorAll('.td-checkbox').forEach(td => td.style.display = isExamTab ? 'table-cell' : 'none');
+                document.getElementById('selectAllExams').checked = false;
             }
 
-        function openPendingInfo(button) {
+                    function toggleAllExams(masterCheckbox) {
+                        const checkboxes = document.querySelectorAll('.batch-exam-cb');
+                        let checkedCount = 0;
+                        let totalVisible = 0;
+
+                        checkboxes.forEach(cb => {
+                           
+                            if (cb.closest('tr').style.display !== 'none') {
+                                totalVisible++;
+                                if (masterCheckbox.checked) {
+                                    if (checkedCount < 20) {
+                                        cb.checked = true;
+                                        checkedCount++;
+                                    } else {
+                                        cb.checked = false; 
+                                    }
+                                } else {
+                                    cb.checked = false;
+                                }
+                            }
+                        });
+
+                    // Notify the admin if the table had more than 20 applicants and got capped
+                    if (masterCheckbox.checked && totalVisible > 20) {
+                        document.getElementById('warningModalMessage').innerText = 'To prevent overloading the schedule, only the first 20 applicants were selected.';
+                        document.getElementById('warningModal').style.display = 'flex';
+                    }
+                }
+
+            // Open Modal with multiple IDs (Enforce the 20 limit)
+            function openBatchScheduleModal() {
+                const selectedCbs = document.querySelectorAll('.batch-exam-cb:checked');
+                
+                // Check if 0 are selected
+                if (selectedCbs.length === 0) {
+                    document.getElementById('warningModalMessage').innerText = 'Please select at least one applicant to schedule before proceeding.';
+                    document.getElementById('warningModal').style.display = 'flex';
+                    return;
+                }
+
+                // Check if more than 20 are selected manually
+                if (selectedCbs.length > 20) {
+                    document.getElementById('warningModalMessage').innerText = 'You can only schedule a maximum of 20 applicants per batch. Please uncheck some applicants.';
+                    document.getElementById('warningModal').style.display = 'flex';
+                    return;
+                }
+
+                const selectedIds = Array.from(selectedCbs).map(cb => cb.value);
+                
+                document.getElementById('schedStudentName').innerText = selectedIds.length + " Selected Applicant(s)";
+                document.getElementById('schedAppId').value = selectedIds.join(',');
+                
+                document.getElementById('scheduleModal').style.display = 'flex';
+            }
+
+            function closeWarningModal() {
+                document.getElementById('warningModal').style.display = 'none';
+            }
+                    function openPendingInfo(button) {
             const modal = document.getElementById('pendingInfoModal');
             const data = button.dataset;
             const fullName = data.firstName + ' ' + data.lastName;
@@ -501,7 +586,27 @@ try {
                 .then(() => location.reload());
             }
         }
+        
     </script>
+    <!-- Custom Warning Modal -->
+            <div id="warningModal" class="modal-backdrop" style="display:none; z-index: 9999;">
+                <div class="modal-dialog modal-card modal-card--small">
+                    <div class="modal-header" style="background: linear-gradient(135deg, #2F4156, #f1a94e); padding: 20px;">
+                        <div>
+                            <span class="modal-caption" style="color: rgba(255,255,255,0.9);">Notice</span>
+                            <h3 style="color: white; margin:0; font-size: 1.2rem;">Action Required</h3>
+                        </div>
+                        <span class="close-modal" onclick="closeWarningModal()" style="color: white;">&times;</span>
+                    </div>
+                    <div class="modal-body" style="text-align: center; padding: 40px 20px;">
+                        <i class="fa-solid fa-triangle-exclamation" style="font-size: 48px; color: #f1a94e; margin-bottom: 20px;"></i>
+                        <p id="warningModalMessage" style="font-size: 1.1rem; color: var(--text-main); margin: 0;">Please select at least one applicant to schedule.</p>
+                    </div>
+                    <div class="modal-footer" style="justify-content: center;">
+                        <button type="button" class="btn-primary" onclick="closeWarningModal()" style="width: 50%;">Understood</button>
+                    </div>
+                </div>
+            </div>
 
     <!-- Documents Modal -->
     <div id="documentsModal" class="modal-backdrop" style="display:none;">

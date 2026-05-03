@@ -13,6 +13,9 @@ $role = $_SESSION['role'] ?? 'guest';
 $application = null;
 $success_msg = "";
 $error_msg = "";
+
+$stmtFilters = $pdo->query("SELECT * FROM college_filters");
+$eligibilityFilters = $stmtFilters->fetchAll(PDO::FETCH_ASSOC);
 // DEFINING COURSES
 $course_offerings = [
     "College of Science" => [
@@ -1065,6 +1068,7 @@ if ($is_logged_in && $role === 'student') {
 
     <script>
         window.courseOfferings = <?= json_encode($course_offerings, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        window.eligibilityFilters = <?= json_encode($eligibilityFilters, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
     </script>
     <script src="../static/admission.js"></script>
     <script src="../static/header.js"></script>
