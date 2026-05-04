@@ -28,7 +28,7 @@ $role = $_SESSION['role'] ?? 'guest';
       
       <div class="sidebar-footer">
                 <?php if(!$is_logged_in): ?>
-                    <a href="login.php" class="login-btn"><i class="fa-soslid fa-user"></i> LOGIN</a>
+                    <a href="login.php" class="login-btn"><i class="fa-solid fa-user"></i> LOGIN</a>
                 <?php else: ?>
                     <a href="logout.php" class="login-btn logout"><i class="fa-solid fa-sign-out"></i> LOGOUT</a>
                 <?php endif; ?>
@@ -128,3 +128,4 @@ $role = $_SESSION['role'] ?? 'guest';
     <script src="/thesis/static/header.js"></script>
   </body>
 </html>
+

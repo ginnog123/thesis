@@ -1,14 +1,14 @@
 :root {
-  --admission-main-bg-dark: #F5EFEB;
-  --admission-primary-accent: #2F4156;
-  --admission-primary-accent-hover: #567C8D;
-  --admission-text-light: #2F4156;
-  --admission-text-muted: #567C8D;
-  --admission-border-dark: #C8D9E6;
-  --admission-input-bg: #FFFFFF;
+  --admission-main-bg-dark: #ffffff;
+  --admission-primary-accent: #2f4156;
+  --admission-primary-accent-hover: #567c8d;
+  --admission-text-light: #2f4156;
+  --admission-text-muted: #567c8d;
+  --admission-border-dark: #c8d9e6;
+  --admission-input-bg: #ffffff;
   --admission-success-green: #27ae60;
   --admission-warning-yellow: #f1a94e;
-  --admission-body-bg: #F5EFEB;
+  --admission-body-bg: #f5efeb;
 }
 
 body {
@@ -457,7 +457,9 @@ body {
   color: #333;
   font-size: 0.95rem;
   box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
-  transition: border-color 0.25s ease, background 0.25s ease;
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease;
 }
 
 .form-group input:focus,
@@ -587,7 +589,9 @@ body {
   height: 100%;
   border-radius: 999px;
   background: var(--admission-primary-accent);
-  transition: width 0.25s ease, background 0.25s ease;
+  transition:
+    width 0.25s ease,
+    background 0.25s ease;
 }
 
 .password-match-label {
@@ -627,7 +631,10 @@ body {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
   box-shadow: 0 18px 40px rgba(201, 76, 76, 0.18);
   letter-spacing: 0.03em;
   text-transform: uppercase;
@@ -967,7 +974,7 @@ body {
 
 .privacy-policy h3 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: #ffffff;
   font-size: 1.2rem;
   font-weight: 600;
 }
@@ -982,10 +989,11 @@ body {
   cursor: pointer;
 }
 
-.privacy-policy input[type="checkbox"] {
+.privacy-policy input[type='checkbox'] {
   margin: 0;
   width: 16px;
   height: 16px;
+  vertical-align: middle;
 }
 
 .privacy-policy a {
@@ -1001,7 +1009,7 @@ body {
 }
 
 .field-error label::after {
-  content: "*";
+  content: '*';
   color: red;
   font-weight: bold;
   margin-left: 5px;
@@ -1033,7 +1041,7 @@ body {
   font-weight: 500;
 }
 
-.upload-item input[type="file"] {
+.upload-item input[type='file'] {
   width: 100%;
   padding: 10px;
   border: 1px solid var(--admission-border-dark);

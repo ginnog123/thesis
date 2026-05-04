@@ -81,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <?php if(!$is_logged_in): ?>
                 <a href="login.php" class="login-btn"><i class="fa-solid fa-right-to-bracket"></i> LOGIN</a>
             <?php else: ?>
-                <div class="user-info" style="text-align: center; color: #dcdcdc; font-size: 12px; margin-bottom: 10px;">
-                    Logged in as: <strong style="color: white; display:block;"><?= htmlspecialchars($_SESSION['user_id']) ?></strong>
+                <div class="user-info" style="text-align: center; color: #111; font-size: 12px; margin-bottom: 10px;">
+                    Logged in as: <strong style="color: #111; display:block;"><?= htmlspecialchars($_SESSION['user_id']) ?></strong>
                 </div>
                 <a href="logout.php" class="login-btn logout"><i class="fa-solid fa-right-from-bracket"></i> LOGOUT</a>
             <?php endif; ?>
@@ -128,5 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     <script src="../static/header.js"></script>
 </body>
 </html>
+
+
 
 

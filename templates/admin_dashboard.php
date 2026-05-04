@@ -47,7 +47,7 @@ try {
     <title>Admin Dashboard | TUP</title>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="../static/admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
 </head>
 <body>
     
@@ -443,9 +443,25 @@ try {
         }
 
         function viewDocuments(appId, name) {
-            fetch('get_documents.php?app_id=' + appId)
-                .then(response => response.json())
-                .then(data => {
+            fetch('get_documents.php?app_id=' + encodeURIComponent(appId))
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error('Document request failed with status ' + response.status + ': ' + text);
+                        });
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    let data;
+                    try {
+                        data = JSON.parse(text);
+                    } catch (error) {
+                        console.error('Unable to parse documents JSON:', error, text);
+                        alert('Unable to load documents. Please check the browser console for details.');
+                        return;
+                    }
+
                     const modal = document.getElementById('documentsModal');
                     document.getElementById('docStudentName').innerText = name;
                     const container = document.getElementById('documentsContainer');
@@ -460,21 +476,9 @@ try {
 
                     docs.forEach(doc => {
                         if (!data[doc.key]) return;
-                        const status = data[doc.key + '_verification'] || 'pending';
-                        const ocrText = data[doc.key + '_ocr_text'] || '';
-                        const statusClass = status === 'ocr_passed' ? 'status-badge success' : status === 'ocr_review' ? 'status-badge warning' : 'status-badge pending';
-                        
-                        let statusLabel = status.replace(/_/g, ' ').toUpperCase();
-                        let ocrDisplay = '';
-                        if (ocrText) {
-                            ocrDisplay = `<div class="ocr-snippet"><strong>Detection Signal:</strong> ${ocrText.replace(/\n/g, ' ').substring(0, 300)}${ocrText.length > 300 ? '...' : ''}</div>`;
-                        } else {
-                            if (status === 'ocr_passed') {
-                                ocrDisplay = `<div class="ocr-snippet ocr-fallback"><strong>✓ Document Type Verified</strong> by filename or image analysis</div>`;
-                            } else {
-                                ocrDisplay = `<div class="ocr-snippet ocr-fallback"><strong>⚠ Requires Review</strong> – Unable to auto-detect document type. Please verify manually.</div>`;
-                            }
-                        }
+                        const statusClass = 'status-badge pending';
+                        const statusLabel = 'PENDING REVIEW';
+                        const ocrDisplay = `<div class="ocr-snippet ocr-fallback"><strong>Uploaded</strong> - awaiting manual verification by the Admissions Office.</div>`;
 
                         const item = document.createElement('div');
                         item.className = 'doc-review-item';
@@ -496,6 +500,10 @@ try {
 
                     modal.dataset.appId = appId;
                     modal.style.display = 'flex';
+                })
+                .catch(error => {
+                    console.error('Unable to load documents:', error);
+                    alert('Unable to load documents. Please check the browser console for details.');
                 });
         }
 
@@ -505,13 +513,6 @@ try {
 
         function proceedApplication() {
             const appId = document.getElementById('documentsModal').dataset.appId;
-            const statuses = Array.from(document.querySelectorAll('#documentsContainer .status-badge'))
-                .map(badge => badge.classList.contains('success') ? 'ocr_passed' : badge.classList.contains('warning') ? 'ocr_review' : 'pending');
-
-            if (statuses.some(status => status !== 'ocr_passed')) {
-                alert('Cannot proceed: one or more documents are not fully OCR-verified. Please review the documents before enrolling.');
-                return;
-            }
 
             if (confirm('Are you sure you want to proceed this application to Enrolled?')) {
                 fetch('update_status.php', {
@@ -525,7 +526,28 @@ try {
                         closeDocuments();
                         location.reload(); // Refresh to update status
                     } else {
-                        alert('This application cannot be enrolled because not all documents have passed OCR verification.');
+                        alert('This application cannot be processed. Please try again.');
+                    }
+                });
+            }
+        }
+
+        function requestResubmit() {
+            const appId = document.getElementById('documentsModal').dataset.appId;
+
+            if (confirm('Request this applicant to resubmit their documents?')) {
+                fetch('update_status.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'app_id=' + appId + '&action=resubmit'
+                })
+                .then(response => response.text())
+                .then(result => {
+                    if (result.trim() === 'ok') {
+                        closeDocuments();
+                        location.reload();
+                    } else {
+                        alert('Unable to request document resubmission. Please try again.');
                     }
                 });
             }
@@ -622,7 +644,7 @@ try {
                 <div id="documentsContainer" class="documents-preview"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-secondary" onclick="closeDocuments()">Close</button>
+                <button type="button" class="btn-secondary" onclick="requestResubmit()">Resubmit</button>
                 <button type="button" class="btn-primary" onclick="proceedApplication()">Proceed</button>
             </div>
         </div>

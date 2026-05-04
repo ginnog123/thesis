@@ -14,6 +14,42 @@ if (isset($_POST['update'])) {
     $stmt->bind_param("si", $status, $id);
     $stmt->execute();
 }
+
+$pricingData = [];
+$db->query(
+    "CREATE TABLE IF NOT EXISTS registrar_pricing (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        document_type VARCHAR(100) NOT NULL UNIQUE,
+        price DECIMAL(10,2) NOT NULL DEFAULT 0
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
+);
+
+$defaultPrices = [
+    'Transcript of Records' => 150.00,
+    'Certification' => 180.00,
+    'Honorable Dismissal' => 200.00,
+    'Evaluation / Checklist' => 220.00,
+    'Authentication' => 240.00,
+    'Lost Registration Form' => 160.00,
+    'Others' => 120.00,
+];
+
+$result = $db->query("SELECT document_type, price FROM registrar_pricing");
+if ($result && $result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $pricingData[$row['document_type']] = (float)$row['price'];
+    }
+}
+
+if (empty($pricingData)) {
+    $stmt = $db->prepare("INSERT INTO registrar_pricing (document_type, price) VALUES (?, ?) ON DUPLICATE KEY UPDATE price = VALUES(price)");
+    foreach ($defaultPrices as $documentType => $price) {
+        $stmt->bind_param('sd', $documentType, $price);
+        $stmt->execute();
+        $pricingData[$documentType] = $price;
+    }
+    $stmt->close();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,10 +64,11 @@ if (isset($_POST['update'])) {
 
     <!-- Main CSS -->
     <link rel="stylesheet" href="../static/registrar_admin.css?v=2">
+    <script>
+        window.registrarPricing = <?php echo json_encode($pricingData, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
+    </script>
 </head>
 <body>
-
-<div class="admin-container">
 
     <!-- SIDEBAR -->
     <aside class="sidebar">
@@ -39,14 +76,19 @@ if (isset($_POST['update'])) {
             <img src="../images/logo tup .svg" alt="TUP Logo" class="admin-logo">
         </div>
 
-        <a href="#" class="nav-link active">
+        <a href="registrar_admin.php" class="nav-link active">
             <i class="fa-solid fa-folder-open"></i>
             Requests
         </a>
 
-        <a href="../logout.php" class="nav-link logout">
+        <a href="registrar_pricing.php" class="nav-link">
+            <i class="fa-solid fa-tags"></i>
+            Pricing
+        </a>
+
+        <a href="home.php" class="nav-link logout">
             <i class="fa-solid fa-right-from-bracket"></i>
-            Exit
+            Logout
         </a>
     </aside>
 
@@ -64,7 +106,7 @@ if (isset($_POST['update'])) {
         <div class="request-filter-bar">
             <div class="filter-item">
                 <label for="requestSearch">Search</label>
-                <input type="text" id="requestSearch" placeholder="Search by request ID, name, or document" />
+                <input type="text" id="requestSearch" placeholder="Search by request ID or Name"/>
             </div>
             <div class="filter-item">
                 <label for="statusFilter">Status</label>
@@ -82,8 +124,11 @@ if (isset($_POST['update'])) {
                 <select id="documentFilter" class="filter-select">
                     <option value="">All Documents</option>
                     <option value="Transcript of Records">Transcript of Records</option>
-                    <option value="Diploma">Diploma</option>
                     <option value="Certification">Certification</option>
+                    <option value="Honorable Dismissal">Honorable Dismissal</option>
+                    <option value="Evaluation / Checklist">Evaluation / Checklist</option>
+                    <option value="Authentication">Authentication</option>
+                    <option value="Lost Registration Form">Lost Registration Form</option>
                     <option value="Others">Others</option>
                 </select>
             </div>
@@ -123,8 +168,11 @@ if (isset($_POST['update'])) {
                                 <select id="reqDocument" onchange="toggleCertInput()" required>
                                     <option value="">Select Document</option>
                                     <option value="Transcript of Records">Transcript of Records</option>
-                                    <option value="Diploma">Diploma</option>
                                     <option value="Certification">Certification</option>
+                                    <option value="Honorable Dismissal">Honorable Dismissal</option>
+                                    <option value="Evaluation / Checklist">Evaluation / Checklist</option>
+                                    <option value="Authentication">Authentication</option>
+                                    <option value="Lost Registration Form">Lost Registration Form</option>
                                     <option value="Others">Others</option>
                                 </select>
                                 <input type="text" id="certType" placeholder="Certification Type" style="display:none;" />
@@ -255,6 +303,8 @@ while ($row = $result->fetch_assoc()):
             <div class="receipt-row"><span>Contact</span><span id="summaryContact"></span></div>
             <div class="receipt-row"><span>Document</span><span id="summaryDocument"></span></div>
             <div class="receipt-row"><span>Quantity</span><span id="summaryQuantity"></span></div>
+            <div class="receipt-row"><span>Unit Price</span><span id="summaryUnitPrice"></span></div>
+            <div class="receipt-row"><span>Total Price</span><span id="summaryTotalPrice"></span></div>
             <div class="receipt-row"><span>Date Requested</span><span id="summaryDate"></span></div>
         </div>
 

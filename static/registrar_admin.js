@@ -83,9 +83,18 @@ async function submitRegistrarRequest() {
       body: formData,
     });
 
-    const data = await response.json();
+    const text = await response.text();
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch (parseError) {
+      console.error('Non-JSON response:', text);
+      alert('Server error: invalid response from registrar endpoint.');
+      return;
+    }
 
-    if (!data.success) {
+    if (!response.ok || !data.success) {
+      console.error('Registrar request failed:', response.status, data);
       alert(data.message || 'Unable to submit request.');
       return;
     }
@@ -110,8 +119,17 @@ function showSummary(request) {
   document.getElementById('summaryEmail').textContent = request.email;
   document.getElementById('summaryContact').textContent = request.contact;
   document.getElementById('summaryDocument').textContent = request.document;
-  document.getElementById('summaryQuantity').textContent =
-    request.quantity || '1';
+  const quantity = parseInt(request.quantity, 10) || 1;
+  document.getElementById('summaryQuantity').textContent = quantity;
+
+  const baseDocument = getDocumentBaseType(request.document);
+  const unitPrice = getDocumentUnitPrice(baseDocument);
+  const totalPrice = unitPrice * quantity;
+
+  document.getElementById('summaryUnitPrice').textContent =
+    formatCurrency(unitPrice);
+  document.getElementById('summaryTotalPrice').textContent =
+    formatCurrency(totalPrice);
   document.getElementById('summaryDate').textContent = request.date_requested;
 
   const qrContent = `Request ID: ${request.request_id}\nName: ${request.student_name}\nTUP ID: ${request.tup_id}\nCourse: ${request.course}\nDocument: ${request.document}\nDate: ${request.date_requested}`;
@@ -138,6 +156,34 @@ function showSummary(request) {
   }
 
   document.getElementById('requestSummaryPopup').style.display = 'flex';
+}
+
+function getDocumentBaseType(documentString) {
+  let doc = documentString.replace(/\s+x\d+$/, '');
+  if (doc.startsWith('Certification of ')) {
+    return 'Certification';
+  }
+  if (doc.startsWith('Other Document:')) {
+    return 'Others';
+  }
+  return doc;
+}
+
+function getDocumentUnitPrice(documentType) {
+  if (!window.registrarPricing) {
+    return 0;
+  }
+  return parseFloat(window.registrarPricing[documentType] || 0);
+}
+
+function formatCurrency(amount) {
+  return (
+    '₱' +
+    amount.toLocaleString('en-PH', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })
+  );
 }
 
 function closeSummaryPopup() {

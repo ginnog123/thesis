@@ -14,6 +14,39 @@ try {
     exit;
 }
 
+function ensureDocumentColumns($pdo) {
+    $columns = [
+        'doc_form138',
+        'doc_moral',
+        'doc_birthcert',
+        'doc_idpic',
+        'doc_form138_verification',
+        'doc_moral_verification',
+        'doc_birthcert_verification',
+        'doc_idpic_verification',
+        'doc_form138_ocr_text',
+        'doc_moral_ocr_text',
+        'doc_birthcert_ocr_text',
+        'doc_idpic_ocr_text'
+    ];
+
+    foreach ($columns as $column) {
+        $stmt = $pdo->prepare("SHOW COLUMNS FROM admission_applications LIKE ?");
+        $stmt->execute([$column]);
+        if ($stmt->rowCount() === 0) {
+            if (str_ends_with($column, '_ocr_text')) {
+                $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column TEXT NULL");
+            } elseif (in_array($column, ['doc_form138', 'doc_moral', 'doc_birthcert', 'doc_idpic'])) {
+                $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column VARCHAR(255) NULL");
+            } else {
+                $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column VARCHAR(32) DEFAULT 'pending'");
+            }
+        }
+    }
+}
+
+ensureDocumentColumns($pdo);
+
 $app_id = $_GET['app_id'] ?? '';
 if (!$app_id) {
     http_response_code(400);

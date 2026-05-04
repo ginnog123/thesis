@@ -27,8 +27,12 @@ try {
     ");
     echo "Sample data inserted.\n";
 
-    // Add document verification columns if needed
+    // Add document columns and verification columns if needed
     $columns = [
+        'doc_form138',
+        'doc_moral',
+        'doc_birthcert',
+        'doc_idpic',
         'doc_form138_verification',
         'doc_moral_verification',
         'doc_birthcert_verification',
@@ -45,6 +49,8 @@ try {
         if ($stmt->rowCount() === 0) {
             if (str_ends_with($column, '_ocr_text')) {
                 $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column TEXT NULL");
+            } elseif (in_array($column, ['doc_form138', 'doc_moral', 'doc_birthcert', 'doc_idpic'])) {
+                $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column VARCHAR(255) NULL");
             } else {
                 $pdo->exec("ALTER TABLE admission_applications ADD COLUMN $column VARCHAR(32) DEFAULT 'pending'");
             }
